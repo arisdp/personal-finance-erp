@@ -341,6 +341,14 @@ return [
             'route' => 'reports.trial',
             'icon' => 'fas fa-balance-scale',
         ],
+        [
+            'text' => 'User Management',
+            'route' => 'admin.users',
+            'icon' => 'fas fa-users',
+            'visible' => function () {
+                return auth()->check() && auth()->user()->role === 'super_admin';
+            },
+        ],
     ],
     /*
     |--------------------------------------------------------------------------

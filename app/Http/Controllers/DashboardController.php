@@ -30,7 +30,8 @@ class DashboardController extends Controller
     {
         return JournalLine::join('accounts', 'accounts.id', '=', 'journal_lines.account_id')
             ->where('accounts.type', $type)
-            ->select(DB::raw('SUM(debit - credit) as balance'))
+            ->where('accounts.user_id', auth()->id())
+            ->selectRaw('SUM(debit - credit) as balance')
             ->value('balance') ?? 0;
     }
 }

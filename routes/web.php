@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\JournalController;
@@ -18,10 +17,29 @@ use App\Http\Controllers\ReportController;
 |
 */
 
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/', function () {
+    return redirect()->route('dashboard');
+});
 
-Route::resource('accounts', AccountController::class);
-Route::resource('journals', JournalController::class);
+Route::middleware(['auth'])->group(function () {
 
-Route::get('ledger', [LedgerController::class, 'index'])->name('ledger.index');
-Route::get('trial-balance', [ReportController::class, 'trialBalance'])->name('reports.trial');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+
+    Route::resource('accounts', AccountController::class);
+    Route::resource('journals', JournalController::class);
+
+    Route::get('ledger', [LedgerController::class, 'index'])
+        ->name('ledger.index');
+
+    Route::get('trial-balance', [ReportController::class, 'trialBalance'])
+        ->name('reports.trial');
+});
+Route::middleware(['auth', 'role:super_admin'])->group(function () {
+
+    Route::get('/admin/users', function () {
+        return view('admin.users');
+    })->name('admin.users');
+});
+
+require __DIR__ . '/auth.php';
