@@ -9,8 +9,12 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, $role)
     {
-        if (!auth()->check() || auth()->user()->role !== $role) {
-            abort(403);
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        if (auth()->user()->role !== $role) {
+            abort(403, 'Unauthorized');
         }
 
         return $next($request);

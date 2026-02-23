@@ -343,11 +343,9 @@ return [
         ],
         [
             'text' => 'User Management',
-            'route' => 'admin.users',
+            'route' => 'admin.users.index',
             'icon' => 'fas fa-users',
-            'visible' => function () {
-                return auth()->check() && auth()->user()->role === 'super_admin';
-            },
+            'can' => 'super-admin-only',
         ],
     ],
     /*

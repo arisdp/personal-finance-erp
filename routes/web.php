@@ -35,11 +35,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('trial-balance', [ReportController::class, 'trialBalance'])
         ->name('reports.trial');
 });
-Route::middleware(['auth', 'role:super_admin'])->group(function () {
-
-    Route::get('/admin/users', function () {
-        return view('admin.users');
-    })->name('admin.users');
-});
-
+Route::middleware(['auth', 'role:super_admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    });
 require __DIR__ . '/auth.php';
