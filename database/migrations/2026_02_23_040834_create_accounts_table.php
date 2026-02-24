@@ -13,15 +13,17 @@ return new class extends Migration
     {
         Schema::create('accounts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id');
             $table->string('code')->unique();
             $table->string('name');
             $table->string('type'); // asset, liability, equity, income, expense
+            $table->string('category'); // asset / liability
+            $table->decimal('credit_limit', 18, 2)->nullable();
+            $table->boolean('track_limit')->default(false);
             $table->uuid('parent_id')->nullable();
             $table->timestamps();
             $table->softDeletesDatetime();
 
-            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            // $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
 
         Schema::table('accounts', function (Blueprint $table) {

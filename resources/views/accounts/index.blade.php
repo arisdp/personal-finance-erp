@@ -1,68 +1,98 @@
 @extends('adminlte::page')
 
-@section('title', 'Chart of Accounts')
+@section('title', 'Accounts')
 
 @section('content_header')
-<h1>Chart of Accounts</h1>
+<h1>Account Management</h1>
 @stop
 
 @section('content')
 
-@if(session('success'))
-<div class="alert alert-success">{{ session('success') }}</div>
-@endif
-
-@if(session('error'))
-<div class="alert alert-danger">{{ session('error') }}</div>
-@endif
-
 <div class="card">
     <div class="card-header">
-        <a href="{{ route('accounts.create') }}" class="btn btn-primary">
+        <a href="{{ route('accounts.create') }}"
+            class="btn btn-primary btn-sm">
             <i class="fas fa-plus"></i> Add Account
         </a>
     </div>
 
-    <div class="card-body table-responsive">
-        <table class="table table-bordered table-striped">
+    <div class="card-body">
+        <div class="mb-3">
+            <select id="categoryFilter" class="form-control" style="width:200px;">
+                <option value="">All Category</option>
+                <option value="Asset">Asset</option>
+                <option value="Liability">Liability</option>
+            </select>
+        </div>
+
+        <table id="accountsTable"
+            class="table table-bordered table-striped">
+
             <thead>
                 <tr>
-                    <th>Code</th>
+                    <th>ID</th>
                     <th>Name</th>
                     <th>Type</th>
-                    <th width="150">Action</th>
+                    <th>Category</th>
+                    <th>Parent</th>
+                    <th>Balance</th>
+                    <th width="120">Action</th>
                 </tr>
             </thead>
+
             <tbody>
                 @foreach($accounts as $account)
                 <tr>
-                    <td>{{ $account->code }}</td>
+                    <td>{{ $account->id }}</td>
                     <td>{{ $account->name }}</td>
                     <td>{{ ucfirst($account->type) }}</td>
+                    <td>{{ ucfirst($account->category ?? 'asset') }}</td>
+                    <td>{{ $account->parent?->name ?? '-' }}</td>
+                    <td>{{ number_format($account->balance) }}</td>
                     <td>
-                        <a href="{{ route('accounts.edit', $account) }}" class="btn btn-sm btn-warning">
-                            Edit
+                        <a href="{{ route('accounts.edit', $account) }}"
+                            class="btn btn-warning btn-xs">
+                            <i class="fas fa-edit"></i>
                         </a>
 
                         <form action="{{ route('accounts.destroy', $account) }}"
                             method="POST"
-                            style="display:inline-block;">
+                            style="display:inline">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-danger"
+
+                            <button class="btn btn-danger btn-xs"
                                 onclick="return confirm('Delete this account?')">
-                                Delete
+                                <i class="fas fa-trash"></i>
                             </button>
                         </form>
                     </td>
                 </tr>
                 @endforeach
             </tbody>
-        </table>
 
-        {{ $accounts->links() }}
+        </table>
 
     </div>
 </div>
 
+@stop
+
+@section('js')
+<script>
+    $(function() {
+
+        var table = $("#accountsTable").DataTable({
+            "responsive": true,
+            "autoWidth": false,
+            "pageLength": 10,
+        });
+
+        // Filter by category
+        $('#categoryFilter').on('change', function() {
+            table.column(3).search(this.value).draw();
+        });
+
+    });
+</script>
 @stop

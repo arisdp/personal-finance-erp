@@ -20,6 +20,11 @@ class JournalLine extends Model
         'credit'
     ];
 
+    public function journal()
+    {
+        return $this->belongsTo(Journal::class);
+    }
+
     public function account()
     {
         return $this->belongsTo(Account::class);

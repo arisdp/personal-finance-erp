@@ -25,7 +25,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
-
     Route::resource('accounts', AccountController::class);
     Route::resource('journals', JournalController::class);
 
@@ -35,10 +34,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('trial-balance', [ReportController::class, 'trialBalance'])
         ->name('reports.trial');
 });
+
+// Route::middleware(['auth'])->group(function () {
+//     Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
+//     Route::get('/accounts/create', [AccountController::class, 'create'])->name('accounts.create');
+//     Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
+// });
+
 Route::middleware(['auth', 'role:super_admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     });
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', function () {
+        return view('profile.edit');
+    })->name('profile.edit');
+});
 require __DIR__ . '/auth.php';

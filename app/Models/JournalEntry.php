@@ -24,4 +24,9 @@ class JournalEntry extends Model
     {
         return $this->hasMany(JournalLine::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
