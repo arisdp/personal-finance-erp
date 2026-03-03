@@ -16,14 +16,14 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('name');
             $table->string('type'); // asset, liability, equity, income, expense
-            $table->string('category'); // asset / liability
+            $table->boolean('is_postable')->default(true);
+            $table->string('category')->default('asset'); // asset, liability, equity, income, expense
             $table->decimal('credit_limit', 18, 2)->nullable();
             $table->boolean('track_limit')->default(false);
             $table->uuid('parent_id')->nullable();
+            $table->string('description')->nullable();
             $table->timestamps();
-            $table->softDeletesDatetime();
-
-            // $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->softDeletes();
         });
 
         Schema::table('accounts', function (Blueprint $table) {

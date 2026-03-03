@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Account extends Model
 {
-    use HasUuids;
+    use HasUuids, SoftDeletes;
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -20,8 +22,16 @@ class Account extends Model
         'type',
         'parent_id',
         'is_postable',
+        'category',
         'credit_limit',
-        'track_limit'
+        'track_limit',
+        'description',
+    ];
+
+    protected $casts = [
+        'is_postable' => 'boolean',
+        'track_limit' => 'boolean',
+        'credit_limit' => 'decimal:2',
     ];
 
     public function parent()
@@ -39,7 +49,27 @@ class Account extends Model
         return $this->hasMany(JournalLine::class);
     }
 
-    // 🔥 Recursive Total
+    public function installments()
+    {
+        return $this->hasMany(Installment::class);
+    }
+
+    public function assetPrices()
+    {
+        return $this->hasMany(AssetPrice::class);
+    }
+
+    public function assetHoldings()
+    {
+        return $this->hasMany(AssetHolding::class);
+    }
+
+    public function budgets()
+    {
+        return $this->hasMany(Budget::class);
+    }
+
+    // 🔥 Recursive Total Balance
     public function getTotalBalanceAttribute()
     {
         if ($this->children->count() > 0) {
@@ -51,6 +81,7 @@ class Account extends Model
         return $this->balance;
     }
 
+    // Credit limit tracking
     public function getUsedLimitAttribute()
     {
         if (!$this->track_limit) return 0;
@@ -64,5 +95,13 @@ class Account extends Model
         if (!$this->track_limit) return null;
 
         return $this->credit_limit - $this->used_limit;
+    }
+
+    // Latest asset price
+    public function getLatestPriceAttribute()
+    {
+        return $this->assetPrices()
+            ->orderBy('price_date', 'desc')
+            ->first()?->price ?? 0;
     }
 }

@@ -8,10 +8,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasUuids;
+    use HasApiTokens, HasFactory, Notifiable, HasUuids, SoftDeletes;
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -25,6 +26,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -50,5 +52,22 @@ class User extends Authenticatable
     public function isSuperAdmin()
     {
         return $this->role === 'super_admin';
+    }
+
+    public function ownedWorkspaces()
+    {
+        return $this->hasMany(Workspace::class, 'owner_id');
+    }
+
+    public function workspaces()
+    {
+        return $this->belongsToMany(Workspace::class, 'workspace_users')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    public function workspaceUsers()
+    {
+        return $this->hasMany(WorkspaceUser::class);
     }
 }

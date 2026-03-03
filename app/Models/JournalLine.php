@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasAuditTrail;
 
 class JournalLine extends Model
 {
-    use HasUuids;
+    use HasUuids, SoftDeletes, HasAuditTrail;
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -17,12 +19,21 @@ class JournalLine extends Model
         'journal_entry_id',
         'account_id',
         'debit',
-        'credit'
+        'credit',
+        'description',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
-    public function journal()
+    protected $casts = [
+        'debit' => 'decimal:2',
+        'credit' => 'decimal:2',
+    ];
+
+    public function journalEntry()
     {
-        return $this->belongsTo(Journal::class);
+        return $this->belongsTo(JournalEntry::class);
     }
 
     public function account()
