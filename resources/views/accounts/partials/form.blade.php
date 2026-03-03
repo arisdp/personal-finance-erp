@@ -1,3 +1,16 @@
+@if(isset($account))
+<div class="form-group mb-3">
+    <label>Category</label>
+    <select name="category" class="form-control" required>
+        @foreach(['asset','liability','equity','income','expense'] as $cat)
+        <option value="{{ $cat }}" @if(old('category', $account->category ?? '') == $cat) selected @endif>
+            {{ ucfirst($cat) }}
+        </option>
+        @endforeach
+    </select>
+</div>
+@endif
+
 <div class="form-group mb-3">
     <label>Code</label>
     <input type="text" name="code"

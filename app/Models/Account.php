@@ -69,6 +69,31 @@ class Account extends Model
         return $this->hasMany(Budget::class);
     }
 
+    /**
+     * Calculate Balance based on category
+     * Asset & Expense: Debit (+) - Credit (-)
+     * Liability, Equity, Income: Credit (+) - Debit (-)
+     */
+    public function getBalanceAttribute()
+    {
+        $isDebitNormal = in_array($this->category, ['asset', 'expense']);
+        
+        $query = $this->journalLines();
+        
+        // Scope to active workspace if session exists
+        if (session()->has('active_workspace_id')) {
+            $query->whereHas('journalEntry', function($q) {
+                $q->where('workspace_id', session('active_workspace_id'));
+            });
+        }
+
+        if ($isDebitNormal) {
+            return $query->sum(DB::raw('debit - credit'));
+        }
+
+        return $query->sum(DB::raw('credit - debit'));
+    }
+
     // 🔥 Recursive Total Balance
     public function getTotalBalanceAttribute()
     {

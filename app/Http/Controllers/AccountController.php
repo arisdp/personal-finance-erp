@@ -17,20 +17,19 @@ class AccountController extends Controller
 
     public function create()
     {
-        $assets = Account::where('category', 'asset')->get();
-        $liabilities = Account::where('category', 'liability')->get();
+        $parents = Account::orderBy('code')->get();
 
-        return view('accounts.create', compact('assets', 'liabilities'));
+        return view('accounts.create', compact('parents'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'code' => 'required|unique:accounts,code',
             'name' => 'required',
             'type' => 'required',
-            'category' => 'required|in:asset,liability',
+            'category' => 'required|in:asset,liability,equity,income,expense',
             'parent_id' => 'nullable|exists:accounts,id',
-            'balance' => 'nullable|numeric'
         ]);
 
         // 🔒 CEK category parent harus sama
@@ -50,8 +49,8 @@ class AccountController extends Controller
 
     public function edit(Account $account)
     {
-        $parents = Account::whereNull('parent_id')
-            ->where('id', '!=', $account->id)
+        $parents = Account::where('id', '!=', $account->id)
+            ->orderBy('code')
             ->get();
 
         return view('accounts.edit', compact('account', 'parents'));
@@ -59,6 +58,14 @@ class AccountController extends Controller
 
     public function update(Request $request, Account $account)
     {
+        $request->validate([
+            'code' => 'required|unique:accounts,code,' . $account->id,
+            'name' => 'required',
+            'type' => 'required',
+            'category' => 'required|in:asset,liability,equity,income,expense',
+            'parent_id' => 'nullable|exists:accounts,id',
+        ]);
+
         $account->update($request->all());
         return redirect()->route('accounts.index')
             ->with('success', 'Account updated');

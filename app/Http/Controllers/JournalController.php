@@ -107,12 +107,99 @@ class JournalController extends Controller
     public function show(string $id)
     {
         $workspaceId = session('active_workspace_id');
-        $journal = Journal::with('lines.account')
+        $journal = Journal::with(['lines.account', 'creator', 'updater'])
             ->where('workspace_id', $workspaceId)
             ->findOrFail($id);
             
         return view('journals.show', compact('journal'));
     }
 
-    // Edit and Delete omitted for brevity, will rely on similar scoping
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $workspaceId = session('active_workspace_id');
+        $journal = Journal::with('lines')
+            ->where('workspace_id', $workspaceId)
+            ->findOrFail($id);
+            
+        $accounts = Account::where('is_postable', true)->orderBy('code')->get();
+        
+        return view('journals.edit', compact('journal', 'accounts'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'description' => 'required',
+            'lines' => 'required|array|min:2',
+            'lines.*.account_id' => 'required|exists:accounts,id',
+            'lines.*.debit' => 'nullable|numeric|min:0',
+            'lines.*.credit' => 'nullable|numeric|min:0',
+            'lines.*.description' => 'nullable|string'
+        ]);
+
+        $workspaceId = session('active_workspace_id');
+        $journal = Journal::where('workspace_id', $workspaceId)->findOrFail($id);
+
+        try {
+            DB::transaction(function () use ($request, $journal) {
+                $totalDebit = collect($request->lines)->sum('debit');
+                $totalCredit = collect($request->lines)->sum('credit');
+
+                if (abs($totalDebit - $totalCredit) > 0.01) {
+                    throw new \Exception('Journal not balanced. Debit: ' . $totalDebit . ', Credit: ' . $totalCredit);
+                }
+
+                $journal->update([
+                    'date' => $request->date,
+                    'description' => $request->description,
+                ]);
+
+                // Clear old lines and recreate (simplified edit for complex double entry)
+                $journal->lines()->delete();
+
+                foreach ($request->lines as $line) {
+                    if (($line['debit'] ?? 0) > 0 || ($line['credit'] ?? 0) > 0) {
+                        $journal->lines()->create([
+                            'account_id' => $line['account_id'],
+                            'debit' => $line['debit'] ?? 0,
+                            'credit' => $line['credit'] ?? 0,
+                            'description' => $line['description'] ?? null
+                        ]);
+                    }
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Journal updated successfully'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        $workspaceId = session('active_workspace_id');
+        $journal = Journal::where('workspace_id', $workspaceId)->findOrFail($id);
+        
+        $journal->delete(); // Soft delete
+
+        return redirect()->route('journals.index')
+            ->with('success', 'Transaksi berhasil dihapus (Soft Delete).');
+    }
 }

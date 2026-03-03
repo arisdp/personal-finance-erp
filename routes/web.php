@@ -33,6 +33,15 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('trial-balance', [ReportController::class, 'trialBalance'])
         ->name('reports.trial');
+    Route::get('profit-loss', [ReportController::class, 'profitAndLoss'])
+        ->name('reports.pl');
+
+    // Investment Routes
+    Route::get('investments', [\App\Http\Controllers\AssetController::class, 'index'])->name('investments.index');
+    Route::get('investments/create', [\App\Http\Controllers\AssetController::class, 'create'])->name('investments.create');
+    Route::post('investments', [\App\Http\Controllers\AssetController::class, 'store'])->name('investments.store');
+    Route::patch('investments/{investment}/price', [\App\Http\Controllers\AssetController::class, 'updatePrice'])->name('investments.updatePrice');
+    Route::delete('investments/{investment}', [\App\Http\Controllers\AssetController::class, 'destroy'])->name('investments.destroy');
 
     // Workspace Routes
     Route::resource('workspaces', \App\Http\Controllers\WorkspaceController::class);

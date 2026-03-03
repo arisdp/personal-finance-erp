@@ -19,9 +19,12 @@
     <div class="card-body">
         <div class="mb-3">
             <select id="categoryFilter" class="form-control" style="width:200px;">
-                <option value="">All Category</option>
+                <option value="">All Categories</option>
                 <option value="Asset">Asset</option>
                 <option value="Liability">Liability</option>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+                <option value="Equity">Equity</option>
             </select>
         </div>
 
@@ -30,25 +33,36 @@
 
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Code</th>
                     <th>Name</th>
                     <th>Type</th>
                     <th>Category</th>
                     <th>Parent</th>
-                    <th>Balance</th>
-                    <th width="120">Action</th>
+                    <th class="text-right">Balance</th>
+                    <th width="120" class="text-center">Action</th>
                 </tr>
             </thead>
 
             <tbody>
                 @foreach($accounts as $account)
                 <tr>
-                    <td>{{ $account->id }}</td>
+                    <td><code>{{ $account->code }}</code></td>
                     <td>{{ $account->name }}</td>
                     <td>{{ ucfirst($account->type) }}</td>
-                    <td>{{ ucfirst($account->category ?? 'asset') }}</td>
-                    <td>{{ $account->parent?->name ?? '-' }}</td>
-                    <td>{{ number_format($account->balance) }}</td>
+                    <td>
+                        @php
+                            $badgeClass = 'badge-secondary';
+                            if($account->category == 'asset') $badgeClass = 'badge-success';
+                            if($account->category == 'liability') $badgeClass = 'badge-danger';
+                            if($account->category == 'income') $badgeClass = 'badge-info';
+                            if($account->category == 'expense') $badgeClass = 'badge-warning';
+                        @endphp
+                        <span class="badge {{ $badgeClass }}">{{ ucfirst($account->category) }}</span>
+                    </td>
+                    <td>{{ $account->parent?->code ?? '-' }}</td>
+                    <td class="text-right font-weight-bold">
+                        Rp {{ number_format($account->balance, 0, ',', '.') }}
+                    </td>
                     <td>
                         <a href="{{ route('accounts.edit', $account) }}"
                             class="btn btn-warning btn-xs">

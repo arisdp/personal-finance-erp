@@ -17,6 +17,18 @@
                     <x-nav-link :href="route('workspaces.index')" :active="request()->routeIs('workspaces.*')">
                         <i class="fas fa-building mr-1"></i> {{ __('Workspaces') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('investments.index')" :active="request()->routeIs('investments.*')">
+                        <i class="fas fa-chart-pie mr-1"></i> {{ __('Investasi') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('ledger.index')" :active="request()->routeIs('ledger.*')">
+                        <i class="fas fa-book mr-1"></i> {{ __('Buku Besar') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('reports.trial')" :active="request()->routeIs('reports.trial')">
+                        <i class="fas fa-balance-scale mr-1"></i> {{ __('Neraca Saldo') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('reports.pl')" :active="request()->routeIs('reports.pl')">
+                        <i class="fas fa-chart-line mr-1"></i> {{ __('Laba Rugi') }}
+                    </x-nav-link>
                 </div>
             </div>
 
