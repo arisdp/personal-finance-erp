@@ -2,36 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Account;
-use App\Models\JournalLine;
-use Illuminate\Support\Facades\DB;
+use App\Services\FinancialSummaryService;
 
 class DashboardController extends Controller
 {
-    public function index()
+    protected $financialService;
+
+    public function __construct(FinancialSummaryService $financialService)
     {
-        $assets = $this->getBalanceByType('asset');
-        $liabilities = $this->getBalanceByType('liability');
-        $equity = $this->getBalanceByType('equity');
-        $income = $this->getBalanceByType('income');
-        $expense = $this->getBalanceByType('expense');
-
-        $netIncome = $income - $expense;
-
-        return view('dashboard.index', compact(
-            'assets',
-            'liabilities',
-            'equity',
-            'netIncome'
-        ));
+        $this->financialService = $financialService;
     }
 
-    private function getBalanceByType($type)
+    public function index()
     {
-        return JournalLine::join('accounts', 'accounts.id', '=', 'journal_lines.account_id')
-            ->where('accounts.type', $type)
-            ->where('accounts.user_id', auth()->id())
-            ->selectRaw('SUM(debit - credit) as balance')
-            ->value('balance') ?? 0;
+        // 1. Get Top Level Metrics
+        $totalCash = $this->financialService->getTotalCash();
+        $totalInvestment = $this->financialService->getTotalInvestment();
+        $totalDebt = $this->financialService->getTotalDebt();
+        $netWorth = $this->financialService->getNetWorth();
+
+        // 2. Get Cashflow Data
+        $cashflowThisMonth = $this->financialService->getMonthlyCashflow();
+        
+        // 3. Get Emergency Fund Status
+        $emergencyFund = $this->financialService->getEmergencyFundStatus();
+
+        return view('dashboard.index', compact(
+            'totalCash',
+            'totalInvestment',
+            'totalDebt',
+            'netWorth',
+            'cashflowThisMonth',
+            'emergencyFund'
+        ));
     }
 }

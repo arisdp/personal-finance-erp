@@ -10,10 +10,12 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('workspaces.index')" :active="request()->routeIs('workspaces.*')">
+                        <i class="fas fa-building mr-1"></i> {{ __('Workspaces') }}
                     </x-nav-link>
                 </div>
             </div>

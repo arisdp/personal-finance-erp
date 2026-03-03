@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\JournalEntry as Journal;
-use App\Models\JournalLine;
 use App\Models\Account;
+use Illuminate\Support\Str;
 
 class JournalController extends Controller
 {
@@ -15,15 +15,14 @@ class JournalController extends Controller
      */
     public function index()
     {
-        $journals = Journal::with('user')
+        $workspaceId = session('active_workspace_id');
+
+        $journals = Journal::with(['creator', 'lines.account'])
+            ->where('workspace_id', $workspaceId)
             ->latest()
             ->paginate(15);
 
-
-        $journals = Journal::latest()->get();
-        $accounts = Account::orderBy('code')->get();
-
-        return view('journals.index', compact('journals', 'accounts'));
+        return view('journals.index', compact('journals'));
     }
 
     /**
@@ -31,7 +30,8 @@ class JournalController extends Controller
      */
     public function create()
     {
-        $accounts = Account::orderBy('code')->get();
+        // Account is global master data, no workspace_id required
+        $accounts = Account::where('is_postable', true)->orderBy('code')->get();
 
         return view('journals.create', compact('accounts'));
     }
@@ -48,40 +48,57 @@ class JournalController extends Controller
             'lines.*.account_id' => 'required|exists:accounts,id',
             'lines.*.debit' => 'nullable|numeric|min:0',
             'lines.*.credit' => 'nullable|numeric|min:0',
+            'lines.*.description' => 'nullable|string'
         ]);
 
-        DB::transaction(function () use ($request) {
+        $workspaceId = session('active_workspace_id');
 
-            $totalDebit = collect($request->lines)->sum('debit');
-            $totalCredit = collect($request->lines)->sum('credit');
+        if (!$workspaceId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Active Workspace required to post a journal.'
+            ], 403);
+        }
 
-            if ($totalDebit != $totalCredit) {
-                throw new \Exception('Journal not balanced');
-            }
+        try {
+            DB::transaction(function () use ($request, $workspaceId) {
+                $totalDebit = collect($request->lines)->sum('debit');
+                $totalCredit = collect($request->lines)->sum('credit');
 
-            $journal = Journal::create([
-                'date' => $request->date,
-                'description' => $request->description,
-                'user_id' => auth()->id(),
-            ]);
-
-            foreach ($request->lines as $line) {
-
-                if (($line['debit'] ?? 0) > 0 || ($line['credit'] ?? 0) > 0) {
-
-                    $journal->lines()->create([
-                        'account_id' => $line['account_id'],
-                        'debit' => $line['debit'] ?? 0,
-                        'credit' => $line['credit'] ?? 0,
-                    ]);
+                if (abs($totalDebit - $totalCredit) > 0.01) {
+                    throw new \Exception('Journal not balanced. Debit: ' . $totalDebit . ', Credit: ' . $totalCredit);
                 }
-            }
-        });
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Journal saved successfully'
-        ]);
+                $journal = Journal::create([
+                    'workspace_id' => $workspaceId,
+                    'date' => $request->date,
+                    'reference' => 'JRN-' . date('Ymd') . '-' . strtoupper(Str::random(4)),
+                    'description' => $request->description,
+                ]);
+
+                foreach ($request->lines as $line) {
+                    if (($line['debit'] ?? 0) > 0 || ($line['credit'] ?? 0) > 0) {
+                        $journal->lines()->create([
+                            'account_id' => $line['account_id'],
+                            'debit' => $line['debit'] ?? 0,
+                            'credit' => $line['credit'] ?? 0,
+                            'description' => $line['description'] ?? null
+                        ]);
+                    }
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Journal saved successfully'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 
     /**
@@ -89,30 +106,13 @@ class JournalController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $workspaceId = session('active_workspace_id');
+        $journal = Journal::with('lines.account')
+            ->where('workspace_id', $workspaceId)
+            ->findOrFail($id);
+            
+        return view('journals.show', compact('journal'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+    // Edit and Delete omitted for brevity, will rely on similar scoping
 }

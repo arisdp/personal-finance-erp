@@ -33,13 +33,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('trial-balance', [ReportController::class, 'trialBalance'])
         ->name('reports.trial');
-});
 
-// Route::middleware(['auth'])->group(function () {
-//     Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
-//     Route::get('/accounts/create', [AccountController::class, 'create'])->name('accounts.create');
-//     Route::post('/accounts', [AccountController::class, 'store'])->name('accounts.store');
-// });
+    // Workspace Routes
+    Route::resource('workspaces', \App\Http\Controllers\WorkspaceController::class);
+    Route::post('workspaces/{workspace}/switch', [\App\Http\Controllers\WorkspaceController::class, 'switch'])->name('workspaces.switch');
+    Route::post('workspaces/{workspace}/members', [\App\Http\Controllers\WorkspaceController::class, 'addMember'])->name('workspaces.addMember');
+    Route::patch('workspaces/{workspace}/members/{user}', [\App\Http\Controllers\WorkspaceController::class, 'updateRole'])->name('workspaces.updateRole');
+    Route::delete('workspaces/{workspace}/members/{user}', [\App\Http\Controllers\WorkspaceController::class, 'removeMember'])->name('workspaces.removeMember');
+});
 
 Route::middleware(['auth', 'role:super_admin'])
     ->prefix('admin')
