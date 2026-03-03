@@ -103,6 +103,12 @@
         <div class="card card-outline card-success">
             <div class="card-header border-0">
                 <h3 class="card-title">Rincian Transaksi: <strong>{{ $selectedAccount->name }}</strong></h3>
+                <div class="card-tools">
+                    <a href="{{ route('ledger.pdf', ['account_id' => $selectedAccount->id, 'start_date' => $startDate, 'end_date' => $endDate]) }}" 
+                       class="btn btn-danger btn-sm">
+                        <i class="fas fa-file-pdf mr-1"></i> Download PDF
+                    </a>
+                </div>
             </div>
             <div class="card-body p-0">
                 <table class="table table-striped table-hover">

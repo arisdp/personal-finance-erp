@@ -10,7 +10,13 @@ class AccountController extends Controller
 {
     public function index()
     {
-        $accounts = Account::with('parent')->latest()->get();
+        // Ambil hanya root accounts (yang tidak punya parent)
+        $accounts = Account::whereNull('parent_id')
+            ->with(['children' => function($query) {
+                $query->orderBy('code');
+            }])
+            ->orderBy('code')
+            ->get();
 
         return view('accounts.index', compact('accounts'));
     }

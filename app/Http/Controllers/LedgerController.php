@@ -78,4 +78,49 @@ class LedgerController extends Controller
             'totalCredit'
         ));
     }
+
+    public function downloadPdf(Request $request)
+    {
+        $workspaceId = session('active_workspace_id');
+        $accountId = $request->input('account_id');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $account = Account::findOrFail($accountId);
+        
+        // Re-use logic from index to get data
+        $isDebitNormal = in_array($account->category, ['asset', 'expense']);
+        
+        $beginningQuery = JournalLine::join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
+            ->where('journal_entries.workspace_id', $workspaceId)
+            ->where('journal_lines.account_id', $account->id)
+            ->whereDate('journal_entries.date', '<', $startDate)
+            ->selectRaw('SUM(debit) as sum_debit, SUM(credit) as sum_credit')
+            ->first();
+
+        $beginningBalance = $isDebitNormal 
+            ? ($beginningQuery->sum_debit ?? 0) - ($beginningQuery->sum_credit ?? 0)
+            : ($beginningQuery->sum_credit ?? 0) - ($beginningQuery->sum_debit ?? 0);
+
+        $mutations = JournalLine::with('journalEntry')
+            ->whereHas('journalEntry', function($query) use ($workspaceId, $startDate, $endDate) {
+                $query->where('workspace_id', $workspaceId)
+                      ->whereBetween('date', [$startDate, $endDate]);
+            })
+            ->where('account_id', $account->id)
+            ->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
+            ->orderBy('journal_entries.date', 'asc')
+            ->orderBy('journal_lines.id', 'asc')
+            ->select('journal_lines.*') 
+            ->get();
+
+        $totalDebit = $mutations->sum('debit');
+        $totalCredit = $mutations->sum('credit');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ledger', compact(
+            'account', 'startDate', 'endDate', 'beginningBalance', 'mutations', 'totalDebit', 'totalCredit'
+        ));
+
+        return $pdf->download("Ledger-{$account->code}-{$startDate}-to-{$endDate}.pdf");
+    }
 }

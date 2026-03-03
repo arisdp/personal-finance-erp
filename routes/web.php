@@ -27,14 +27,22 @@ Route::middleware(['auth'])->group(function () {
         ->name('dashboard');
     Route::resource('accounts', AccountController::class);
     Route::resource('journals', JournalController::class);
+    Route::resource('budgets', BudgetController::class);
 
     Route::get('ledger', [LedgerController::class, 'index'])
         ->name('ledger.index');
+    Route::get('ledger/download-pdf', [LedgerController::class, 'downloadPdf'])
+        ->name('ledger.pdf');
 
     Route::get('trial-balance', [ReportController::class, 'trialBalance'])
         ->name('reports.trial');
+    Route::get('trial-balance/download-pdf', [ReportController::class, 'trialBalancePdf'])
+        ->name('reports.trial.pdf');
+
     Route::get('profit-loss', [ReportController::class, 'profitAndLoss'])
         ->name('reports.pl');
+    Route::get('profit-loss/download-pdf', [ReportController::class, 'profitAndLossPdf'])
+        ->name('reports.pl.pdf');
 
     // Investment Routes
     Route::get('investments', [\App\Http\Controllers\AssetController::class, 'index'])->name('investments.index');

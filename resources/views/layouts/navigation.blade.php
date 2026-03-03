@@ -20,6 +20,9 @@
                     <x-nav-link :href="route('investments.index')" :active="request()->routeIs('investments.*')">
                         <i class="fas fa-chart-pie mr-1"></i> {{ __('Investasi') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('budgets.index')" :active="request()->routeIs('budgets.*')">
+                        <i class="fas fa-bullseye mr-1"></i> {{ __('Anggaran') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('ledger.index')" :active="request()->routeIs('ledger.*')">
                         <i class="fas fa-book mr-1"></i> {{ __('Buku Besar') }}
                     </x-nav-link>

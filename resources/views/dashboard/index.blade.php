@@ -176,4 +176,120 @@
 
     </div>
 
+    <!-- Barisan ke-3: Credit Card & Paylater Usage (User Request) -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card card-outline card-warning">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-credit-card mr-1"></i> Penggunaan Kartu Kredit & Paylater</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Nama Kartu / Layanan</th>
+                                    <th class="text-right">Total Limit</th>
+                                    <th class="text-right">Digunakan</th>
+                                    <th class="text-right">Sisa Limit</th>
+                                    <th width="30%">Usage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($creditCards as $card)
+                                <tr>
+                                    <td>{{ $card['name'] }}</td>
+                                    <td class="text-right text-muted">Rp {{ number_format($card['limit'], 0, ',', '.') }}</td>
+                                    <td class="text-right text-danger font-weight-bold">Rp {{ number_format($card['used'], 0, ',', '.') }}</td>
+                                    <td class="text-right text-success">Rp {{ number_format($card['available'], 0, ',', '.') }}</td>
+                                    <td>
+                                        <div class="progress progress-xs mt-2" title="{{ $card['usage_percent'] }}% Terpakai">
+                                            @php 
+                                                $barClass = 'bg-success'; 
+                                                if($card['usage_percent'] > 50) $barClass = 'bg-warning';
+                                                if($card['usage_percent'] > 80) $barClass = 'bg-danger';
+                                            @endphp
+                                            <div class="progress-bar {{ $barClass }}" style="width: {{ $card['usage_percent'] }}%"></div>
+                                        </div>
+                                        <small class="text-muted">{{ $card['usage_percent'] }}% terpakai</small>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <i class="fas fa-info-circle mr-1"></i> Belum ada akun yang diset untuk tracking limit.
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- Barisan ke-4: Budget Monitoring (User Request) -->
+    <div class="row mt-4 mb-5">
+        <div class="col-md-12">
+            <div class="card card-outline card-info">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-bullseye mr-1"></i> Monitoring Anggaran & Alarm Limit</h3>
+                    <div class="card-tools">
+                        <a href="{{ route('budgets.index') }}" class="btn btn-tool btn-sm">
+                            <i class="fas fa-cog"></i> Atur Budget
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Kategori Pengeluaran</th>
+                                    <th class="text-right">Target Budget</th>
+                                    <th class="text-right">Realisasi (Actual)</th>
+                                    <th class="text-right">Sisa / Lebih</th>
+                                    <th width="30%">Usage Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($budgetSummary as $item)
+                                <tr>
+                                    <td>{{ $item['name'] }}</td>
+                                    <td class="text-right text-muted">Rp {{ number_format($item['budget'], 0, ',', '.') }}</td>
+                                    <td class="text-right font-weight-bold">Rp {{ number_format($item['actual'], 0, ',', '.') }}</td>
+                                    <td class="text-right {{ $item['remaining'] < 0 ? 'text-danger font-weight-bold' : 'text-success' }}">
+                                        {{ $item['remaining'] < 0 ? '-' : '' }}Rp {{ number_format(abs($item['remaining']), 0, ',', '.') }}
+                                        @if($item['remaining'] < 0)
+                                            <i class="fas fa-exclamation-circle ml-1" title="Melebihi Budget!"></i>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-sm mt-2" title="{{ $item['percent'] }}% Terpakai">
+                                            @php 
+                                                $barClass = 'bg-info'; 
+                                                if($item['percent'] > 80) $barClass = 'bg-warning';
+                                                if($item['percent'] > 100) $barClass = 'bg-danger';
+                                            @endphp
+                                            <div class="progress-bar {{ $barClass }}" style="width: {{ min(100, $item['percent']) }}%"></div>
+                                        </div>
+                                        <small class="{{ $item['percent'] > 100 ? 'text-danger font-weight-bold' : 'text-muted' }}">
+                                            {{ $item['percent'] }}% dari budget
+                                        </small>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <i class="fas fa-info-circle mr-1"></i> Belum ada budget yang diatur untuk bulan ini.
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @stop

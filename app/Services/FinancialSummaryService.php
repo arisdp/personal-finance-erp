@@ -32,7 +32,7 @@ class FinancialSummaryService
     }
 
     /**
-     * Get Total Cash (Accounts 1100 - Current Assets)
+     * Get Total Cash (All liquid assets)
      */
     public function getTotalCash(): float
     {
@@ -42,25 +42,24 @@ class FinancialSummaryService
             ->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
             ->where('journal_entries.workspace_id', $this->workspaceId)
             ->where('accounts.category', 'asset')
-            // Using LIKE on code to match 11% (Current Assets)
-            ->where('accounts.code', 'like', '11%')
+            ->whereIn('accounts.type', ['bank', 'ewallet', 'cash'])
             ->selectRaw('SUM(debit - credit) as balance')
             ->value('balance') ?? 0;
     }
 
     /**
-     * Get Total Investment (Accounts 1300 + Asset Holdings)
+     * Get Total Investment (Asset category, investment type + Asset Holdings)
      */
     public function getTotalInvestment(): float
     {
         if (!$this->workspaceId) return 0;
 
-        // 1. Get cash balance in investment accounts (1300)
+        // 1. Get cash balance in investment accounts
         $cashInInvestments = JournalLine::join('accounts', 'accounts.id', '=', 'journal_lines.account_id')
             ->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
             ->where('journal_entries.workspace_id', $this->workspaceId)
             ->where('accounts.category', 'asset')
-            ->where('accounts.code', 'like', '13%')
+            ->where('accounts.type', 'investment')
             ->selectRaw('SUM(debit - credit) as balance')
             ->value('balance') ?? 0;
 
@@ -73,19 +72,40 @@ class FinancialSummaryService
     }
 
     /**
-     * Get Total Debt (Accounts 2000 - Liabilities)
+     * Get Total Debt (All Liability accounts)
      */
     public function getTotalDebt(): float
     {
         if (!$this->workspaceId) return 0;
 
-        // Balance of all liability accounts
         return JournalLine::join('accounts', 'accounts.id', '=', 'journal_lines.account_id')
             ->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
             ->where('journal_entries.workspace_id', $this->workspaceId)
             ->where('accounts.category', 'liability')
-            ->selectRaw('SUM(credit - debit) as balance') // Liabilities increase with credit
+            ->selectRaw('SUM(credit - debit) as balance')
             ->value('balance') ?? 0;
+    }
+
+    /**
+     * Get Credit Cards/Paylater Usage & Limits
+     */
+    public function getCreditLimitSummary(): array
+    {
+        if (!$this->workspaceId) return [];
+
+        $cards = \App\Models\Account::where('category', 'liability')
+            ->where('track_limit', true)
+            ->get();
+
+        return $cards->map(function($card) {
+            return [
+                'name' => $card->name,
+                'limit' => (float)$card->credit_limit,
+                'used' => (float)$card->used_limit, // This uses the accessor in Account model
+                'available' => (float)$card->available_limit,
+                'usage_percent' => $card->credit_limit > 0 ? min(100, round(($card->used_limit / $card->credit_limit) * 100)) : 0
+            ];
+        })->toArray();
     }
 
     /**
@@ -115,6 +135,43 @@ class FinancialSummaryService
     public function getNetWorth(): float
     {
         return $this->getTotalAssets() - $this->getTotalDebt();
+    }
+
+    /**
+     * Get Budget vs Actual Summary
+     */
+    public function getBudgetSummary(): array
+    {
+        if (!$this->workspaceId) return [];
+
+        $month = (int)date('n');
+        $year = (int)date('Y');
+
+        $budgets = \App\Models\Budget::where('workspace_id', $this->workspaceId)
+            ->where('month', $month)
+            ->where('year', $year)
+            ->with('account')
+            ->get();
+
+        return $budgets->map(function($budget) use ($month, $year) {
+            $actual = JournalLine::join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
+                ->where('journal_entries.workspace_id', $this->workspaceId)
+                ->where('journal_lines.account_id', $budget->account_id)
+                ->whereMonth('journal_entries.date', $month)
+                ->whereYear('journal_entries.date', $year)
+                ->selectRaw('SUM(debit - credit) as total')
+                ->value('total') ?? 0;
+
+            $percent = $budget->amount > 0 ? round(($actual / $budget->amount) * 100) : 0;
+            
+            return [
+                'name' => $budget->account->name,
+                'budget' => (float)$budget->amount,
+                'actual' => (float)$actual,
+                'percent' => (float)$percent,
+                'remaining' => (float)($budget->amount - $actual)
+            ];
+        })->toArray();
     }
 
     /**

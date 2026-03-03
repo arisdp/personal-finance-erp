@@ -327,20 +327,44 @@ return [
         ],
 
         [
+            'text' => 'Investasi',
+            'route' => 'investments.index',
+            'icon' => 'fas fa-chart-pie',
+        ],
+
+        [
+            'text' => 'Anggaran',
+            'route' => 'budgets.index',
+            'icon' => 'fas fa-bullseye',
+        ],
+
+        [
             'header' => 'REPORTS',
         ],
 
         [
-            'text' => 'Ledger',
+            'text' => 'Buku Besar',
             'route' => 'ledger.index',
-            'icon' => 'fas fa-list',
+            'icon' => 'fas fa-book-open',
         ],
 
         [
-            'text' => 'Trial Balance',
+            'text' => 'Neraca Saldo',
             'route' => 'reports.trial',
             'icon' => 'fas fa-balance-scale',
         ],
+
+        [
+            'text' => 'Laba Rugi',
+            'route' => 'reports.pl',
+            'icon' => 'fas fa-chart-line',
+        ],
+
+        [
+            'header' => 'ADMINISTRATION',
+            'can' => 'super-admin-only',
+        ],
+
         [
             'text' => 'User Management',
             'route' => 'admin.users.index',

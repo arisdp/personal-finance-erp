@@ -26,6 +26,9 @@
         <div class="card-header">
             <h3 class="card-title">Laporan Neraca Saldo per {{ \Carbon\Carbon::parse($asOfDate)->format('d M Y') }}</h3>
             <div class="card-tools">
+                <a href="{{ route('reports.trial.pdf', ['date' => $asOfDate]) }}" class="btn btn-danger btn-sm mr-2">
+                    <i class="fas fa-file-pdf mr-1"></i> Download PDF
+                </a>
                 <button type="button" class="btn btn-tool" onclick="window.print()"><i class="fas fa-print"></i> Cetak</button>
             </div>
         </div>

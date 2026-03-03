@@ -27,13 +27,21 @@ class DashboardController extends Controller
         // 3. Get Emergency Fund Status
         $emergencyFund = $this->financialService->getEmergencyFundStatus();
 
+        // 4. Get Credit Card Info
+        $creditCards = $this->financialService->getCreditLimitSummary();
+
+        // 5. Get Budget Summary
+        $budgetSummary = $this->financialService->getBudgetSummary();
+
         return view('dashboard.index', compact(
             'totalCash',
             'totalInvestment',
             'totalDebt',
             'netWorth',
             'cashflowThisMonth',
-            'emergencyFund'
+            'emergencyFund',
+            'creditCards',
+            'budgetSummary'
         ));
     }
 }

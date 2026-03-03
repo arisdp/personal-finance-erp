@@ -94,16 +94,16 @@ class Account extends Model
         return $query->sum(DB::raw('credit - debit'));
     }
 
-    // 🔥 Recursive Total Balance
+    // 🔥 Recursive Total Balance (Includes current account + all descendants)
     public function getTotalBalanceAttribute()
     {
-        if ($this->children->count() > 0) {
-            return $this->children->sum(function ($child) {
-                return $child->total_balance;
-            });
+        $balance = $this->balance;
+        
+        foreach ($this->children as $child) {
+            $balance += $child->total_balance;
         }
 
-        return $this->balance;
+        return $balance;
     }
 
     // Credit limit tracking
@@ -111,8 +111,15 @@ class Account extends Model
     {
         if (!$this->track_limit) return 0;
 
-        return $this->journalLines()
-            ->sum(DB::raw('credit - debit'));
+        $query = $this->journalLines();
+        
+        if (session()->has('active_workspace_id')) {
+            $query->whereHas('journalEntry', function($q) {
+                $q->where('workspace_id', session('active_workspace_id'));
+            });
+        }
+
+        return $query->sum(DB::raw('credit - debit'));
     }
 
     public function getAvailableLimitAttribute()
