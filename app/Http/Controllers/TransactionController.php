@@ -44,12 +44,12 @@ class TransactionController extends Controller
     {
         $request->validate([
             'date' => 'required|date',
-            'type' => 'required|in:expense,income,transfer,investment,debt_payment',
+            'type' => 'required|in:expense,income,transfer,investment,debt_payment,initial_balance',
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
             // Specific validation based on type
-            'from_account_id' => 'required_if:type,expense,transfer,investment,debt_payment|exists:accounts,id',
-            'to_account_id' => 'required_if:type,income,transfer,investment,debt_payment|exists:accounts,id',
+            'from_account_id' => 'required_if:type,expense,transfer,investment,debt_payment,initial_balance|exists:accounts,id',
+            'to_account_id' => 'required_if:type,income,transfer,investment,debt_payment,initial_balance|exists:accounts,id',
             // Investment specific
             'asset_name' => 'required_if:type,investment|nullable|string|max:255',
             'asset_type' => 'required_if:type,investment|nullable|string',
@@ -118,6 +118,10 @@ class TransactionController extends Controller
                             $creditAccountId = $request->from_account_id;
                             break;
                         case 'income':
+                            $debitAccountId = $request->to_account_id;
+                            $creditAccountId = $request->from_account_id;
+                            break;
+                        case 'initial_balance':
                             $debitAccountId = $request->to_account_id;
                             $creditAccountId = $request->from_account_id;
                             break;

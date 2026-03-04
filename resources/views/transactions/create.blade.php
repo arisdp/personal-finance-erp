@@ -37,6 +37,7 @@
                                 <select name="type" id="type" class="form-control select2" required onchange="toggleFormFields()">
                                     <option value="expense">📉 Pengeluaran (Belanja/Tagihan)</option>
                                     <option value="income">📈 Pemasukan (Gaji/Bonus)</option>
+                                    <option value="initial_balance">⚖️ Penyetoran Modal / Saldo Awal</option>
                                     <option value="transfer">🔄 Transfer Antar Rekening</option>
                                     <option value="investment">💎 Pembelian Investasi (Saham/Emas)</option>
                                     <option value="debt_payment">💳 Pembayaran Cicilan / Hutang / Tagihan</option>
@@ -225,6 +226,9 @@
         } else if (type === 'income') {
             labelFrom.text('Sumber Pemasukan (Dari siapa?)');
             labelTo.text('Tujuan Dana (Masuk ke mana?)');
+        } else if (type === 'initial_balance') {
+            labelFrom.text('Sumber Modal / Equity (Kredit)');
+            labelTo.text('Tujuan Harta / Saldo (Debit)');
         } else if (type === 'transfer') {
             labelFrom.text('Rekening Sumber');
             labelTo.text('Rekening Tujuan');

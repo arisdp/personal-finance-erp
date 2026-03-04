@@ -47,6 +47,11 @@ class AccountController extends Controller
             }
         }
 
+        $request->merge([
+            'track_limit' => $request->has('track_limit') ? 1 : 0,
+            'credit_limit' => $request->has('track_limit') ? str_replace('.', '', $request->credit_limit) : 0,
+        ]);
+
         Account::create($request->all());
 
         return redirect()->route('accounts.index')
@@ -64,12 +69,18 @@ class AccountController extends Controller
 
     public function update(Request $request, Account $account)
     {
+        $request->merge([
+            'track_limit' => $request->has('track_limit') ? 1 : 0,
+            'credit_limit' => $request->has('track_limit') ? str_replace('.', '', $request->credit_limit) : 0,
+        ]);
+
         $request->validate([
             'code' => 'required|unique:accounts,code,' . $account->id,
             'name' => 'required',
             'type' => 'required',
             'category' => 'required|in:asset,liability,equity,income,expense',
             'parent_id' => 'nullable|exists:accounts,id',
+            'credit_limit' => 'nullable|numeric|min:0',
         ]);
 
         $account->update($request->all());

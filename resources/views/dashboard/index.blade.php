@@ -242,13 +242,16 @@
             </div>
         </div>
     </div>
-    <!-- Barisan ke-4: Upcoming Bills Reminder (User Request) -->
+    <!-- Barisan ke-4: Active Bills Status (User Request) -->
     @if(count($upcomingBills) > 0)
     <div class="row mt-4">
         <div class="col-md-12">
             <div class="card card-outline card-warning">
                 <div class="card-header">
-                    <h3 class="card-title text-warning"><i class="fas fa-bell mr-1"></i> Pengingat Tagihan (7 Hari Mendatang)</h3>
+                    <h3 class="card-title text-warning"><i class="fas fa-bell mr-1"></i> Status Tagihan Bulan Ini</h3>
+                    <div class="card-tools">
+                        <a href="{{ route('recurring.index') }}" class="btn btn-tool btn-sm"><i class="fas fa-arrow-right"></i></a>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -268,13 +271,29 @@
                                     <td>{{ \Carbon\Carbon::parse($bill['next_due_date'])->format('d M Y') }}</td>
                                     <td class="text-right font-weight-bold">Rp {{ number_format($bill['amount'], 0, ',', '.') }}</td>
                                     <td class="text-center">
-                                        @php $daysLeft = now()->diffInDays($bill['next_due_date'], false); @endphp
-                                        @if($daysLeft < 0)
-                                            <span class="badge badge-danger">Terlambat {{ abs($daysLeft) }} Hari</span>
-                                        @elseif($daysLeft == 0)
-                                            <span class="badge badge-warning">Hari Ini!</span>
+                                        @php 
+                                            $diff = now()->diffInDays($bill['next_due_date'], false);
+                                            $isPaidThisMonth = false;
+                                            if (isset($bill['last_posted_date']) && $bill['last_posted_date']) {
+                                                $lastPaid = \Carbon\Carbon::parse($bill['last_posted_date']);
+                                                if ($bill['frequency'] === 'monthly') {
+                                                    $isPaidThisMonth = $lastPaid->month == now()->month && $lastPaid->year == now()->year;
+                                                } elseif ($bill['frequency'] === 'weekly') {
+                                                    $isPaidThisMonth = $lastPaid->diffInWeeks(now()) === 0;
+                                                }
+                                            }
+                                        @endphp
+                                        
+                                        @if($isPaidThisMonth)
+                                            <span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Lunas</span>
                                         @else
-                                            <span class="badge badge-info">{{ $daysLeft }} Hari Lagi</span>
+                                            @if($diff < 0)
+                                                <span class="badge badge-danger">Terlambat {{ abs($diff) }} Hari</span>
+                                            @elseif($diff == 0)
+                                                <span class="badge badge-warning">Hari Ini!</span>
+                                            @else
+                                                <span class="badge badge-info">{{ $diff }} Hari Lagi</span>
+                                            @endif
                                         @endif
                                     </td>
                                 </tr>

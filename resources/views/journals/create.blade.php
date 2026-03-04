@@ -140,10 +140,10 @@
                 filterOptions('#account_b', ['expense']);
 
             } else if (type === 'income') {
-                $('#labelAccountA').text('Sumber Pendapatan (Kredit)');
+                $('#labelAccountA').text('Sumber Pendapatan / Modal (Kredit)');
                 $('#labelAccountB').text('Penyimpanan Kas/Bank (Debit)');
 
-                filterOptions('#account_a', ['income']);
+                filterOptions('#account_a', ['income', 'equity']);
                 filterOptions('#account_b', ['asset']);
 
             } else if (type === 'transfer') {

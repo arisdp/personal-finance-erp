@@ -183,7 +183,6 @@ class FinancialSummaryService
 
         return \App\Models\RecurringTransaction::where('workspace_id', $this->workspaceId)
             ->where('is_active', true)
-            ->where('next_due_date', '<=', now()->addDays(7))
             ->with(['debitAccount', 'creditAccount'])
             ->orderBy('next_due_date', 'asc')
             ->get()
@@ -205,11 +204,17 @@ class FinancialSummaryService
 
         $activeInstallments = \App\Models\Installment::where('workspace_id', $this->workspaceId)
             ->where('status', 'active')
+            ->with('account')
             ->get();
+            
+        // Use the actual account balance to reflect true outstanding principal (liability balance)
+        $totalRemaining = $activeInstallments->sum(function($inst) {
+            return $inst->account ? $inst->account->calculateBalance($this->workspaceId) : 0;
+        });
 
         return [
             'total_monthly' => (float)$activeInstallments->sum('monthly_amount'),
-            'total_remaining' => (float)$activeInstallments->sum(fn($i) => $i->remaining_amount),
+            'total_remaining' => (float)$totalRemaining,
             'count' => $activeInstallments->count()
         ];
     }
