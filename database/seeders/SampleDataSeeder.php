@@ -44,7 +44,7 @@ class SampleDataSeeder extends Seeder
         
         $gajiSuami = Account::where('code', '4110')->first(); // Gaji Pokok
         $belanjaBulanan = Account::where('code', '5131')->first(); // Belanja Dapur / Sembako
-        $listrik = Account::where('code', '5120')->first(); // Listrik, Air, WiFi
+        $listrik = Account::where('code', '5121')->first(); // Listrik (PLN)
         $makanDiLuar = Account::where('code', '5210')->first(); // Dining
         
         $kpr = Account::where('code', '2210')->first(); // KPR Rumah

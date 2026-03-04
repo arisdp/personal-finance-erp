@@ -178,7 +178,9 @@ class ChartOfAccountsSeeder extends Seeder
         // Pengeluaran Rutin
         $fixedExpense = $insert('5100', 'PENGELUARAN RUTIN (FIXED)', 'expense', 'expense', $expense, false);
         $insert('5110', 'Zakat, Infaq & Sedekah', 'expense', 'expense', $fixedExpense);
-        $insert('5120', 'Listrik, Air & WiFi', 'expense', 'expense', $fixedExpense);
+        $insert('5121', 'Tagihan Listrik (PLN)', 'expense', 'expense', $fixedExpense);
+        $insert('5122', 'Tagihan Air (PDAM)', 'expense', 'expense', $fixedExpense);
+        $insert('5123', 'Tagihan Internet & TV Kabel', 'expense', 'expense', $fixedExpense);
         $insert('5131', 'Belanja Dapur / Sembako', 'expense', 'expense', $fixedExpense);
         $insert('5132', 'Laundry & Kebersihan', 'expense', 'expense', $fixedExpense);
         $insert('5133', 'Gas & Air Galon', 'expense', 'expense', $fixedExpense);

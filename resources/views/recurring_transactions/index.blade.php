@@ -48,13 +48,31 @@
                             @php 
                                 $diff = now()->diffInDays($recurring->next_due_date, false);
                                 $color = $diff < 3 ? 'text-danger font-weight-bold' : ($diff < 7 ? 'text-warning' : 'text-dark');
+                                
+                                // Check if paid this month (for monthly)
+                                $isPaidThisMonth = false;
+                                if ($recurring->last_posted_date) {
+                                    $lastPaid = \Carbon\Carbon::parse($recurring->last_posted_date);
+                                    if ($recurring->frequency === 'monthly') {
+                                        $isPaidThisMonth = $lastPaid->month == now()->month && $lastPaid->year == now()->year;
+                                    } elseif ($recurring->frequency === 'weekly') {
+                                        $isPaidThisMonth = $lastPaid->diffInWeeks(now()) === 0;
+                                    }
+                                }
                             @endphp
+                            
+                            @if($isPaidThisMonth)
+                                <span class="badge badge-success mb-1"><i class="fas fa-check-circle mr-1"></i> Lunas Periode Ini</span><br>
+                            @endif
+
                             <span class="{{ $color }}">
                                 {{ $recurring->next_due_date->format('d M Y') }}
-                                @if($diff < 0)
-                                    <small class="badge badge-danger ml-1">Terlambat!</small>
-                                @elseif($diff <= 3)
-                                    <small class="badge badge-warning ml-1">Segera!</small>
+                                @if(!$isPaidThisMonth)
+                                    @if($diff < 0)
+                                        <small class="badge badge-danger ml-1">Terlambat!</small>
+                                    @elseif($diff <= 3)
+                                        <small class="badge badge-warning ml-1">Segera!</small>
+                                    @endif
                                 @endif
                             </span>
                         </td>

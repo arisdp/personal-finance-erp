@@ -161,9 +161,18 @@ class TransactionController extends Controller
                 if ($request->filled('recurring_transaction_id')) {
                     $rt = RecurringTransaction::find($request->recurring_transaction_id);
                     if ($rt) {
-                        // Update next due date to next month
+                        // Dynamically update next due date based on frequency
+                        $nextDate = Carbon::parse($rt->next_due_date);
+                        if ($rt->frequency === 'monthly') {
+                            $nextDate->addMonth();
+                        } elseif ($rt->frequency === 'weekly') {
+                            $nextDate->addWeek();
+                        } elseif ($rt->frequency === 'yearly') {
+                            $nextDate->addYear();
+                        }
+
                         $rt->update([
-                            'next_due_date' => Carbon::parse($rt->next_due_date)->addMonth(),
+                            'next_due_date' => $nextDate,
                             'last_posted_date' => $request->date
                         ]);
                     }
