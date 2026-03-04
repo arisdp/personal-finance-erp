@@ -42,67 +42,96 @@ class SampleDataSeeder extends Seeder
         $bankUtama = Account::where('code', '1120')->first();
         $kasTunai = Account::where('code', '1110')->first();
         $modalAwal = Account::where('code', '3100')->first();
+        
         $gajiSuami = Account::where('code', '4100')->first();
         $belanjaBulanan = Account::where('code', '5110')->first();
         $listrik = Account::where('code', '5120')->first();
         $internet = Account::where('code', '5140')->first();
+        $makanDiLuar = Account::where('code', '5410')->first();
+        
         $kpr = Account::where('code', '2210')->first();
         $cicilanKpr = Account::where('code', '5510')->first();
+        
         $emasFisik = Account::where('code', '1310')->first();
+        
+        // Liability Cards
+        $ccUtama = Account::where('code', '2110')->first(); // Kartu Kredit Utama (Limit 20jt)
+        $paylater = Account::where('code', '2130')->first(); // Shopee Paylater (Limit 5jt)
+
+        $now = Carbon::now();
+        $currentMonth = $now->month;
+        $currentYear = $now->year;
+        
+        $lastMonth = Carbon::now()->subMonth();
 
         // 1. Saldo Awal (Equity -> Bank)
-        $this->createJournal($workspaceId, 'Saldo Awal', '2026-01-01', [
+        $this->createJournal($workspaceId, 'Saldo Awal', $now->copy()->startOfYear()->format('Y-m-d'), [
             ['account_id' => $bankUtama->id, 'debit' => 50000000, 'credit' => 0],
             ['account_id' => $kasTunai->id, 'debit' => 2000000, 'credit' => 0],
             ['account_id' => $modalAwal->id, 'debit' => 0, 'credit' => 52000000],
         ]);
 
-        // 2. Pendapatan Gaji (Jan & Feb)
-        for ($m = 1; $m <= 2; $m++) {
-            $date = "2026-0$m-25";
-            $this->createJournal($workspaceId, "Gaji Jan/Feb 2026", $date, [
-                ['account_id' => $bankUtama->id, 'debit' => 15000000, 'credit' => 0],
-                ['account_id' => $gajiSuami->id, 'debit' => 0, 'credit' => 15000000],
-            ]);
-        }
+        // 2. Pendapatan Gaji (Bulan Lalu & Bulan Ini)
+        $this->createJournal($workspaceId, "Gaji Bulan Lalu", $lastMonth->copy()->endOfMonth()->format('Y-m-d'), [
+            ['account_id' => $bankUtama->id, 'debit' => 15000000, 'credit' => 0],
+            ['account_id' => $gajiSuami->id, 'debit' => 0, 'credit' => 15000000],
+        ]);
+        
+        $this->createJournal($workspaceId, "Gaji Bulan Ini", $now->copy()->startOfMonth()->addDays(1)->format('Y-m-d'), [
+            ['account_id' => $bankUtama->id, 'debit' => 15000000, 'credit' => 0],
+            ['account_id' => $gajiSuami->id, 'debit' => 0, 'credit' => 15000000],
+        ]);
 
-        // 3. Pengeluaran Rutin
-        $this->createJournal($workspaceId, "Belanja Bulanan", '2026-02-05', [
+        // 3. Pengeluaran Rutin Bulan Ini (Cash/Bank)
+        $this->createJournal($workspaceId, "Belanja Bulanan Supermarket", $now->copy()->startOfMonth()->addDays(2)->format('Y-m-d'), [
             ['account_id' => $belanjaBulanan->id, 'debit' => 3000000, 'credit' => 0],
             ['account_id' => $bankUtama->id, 'debit' => 0, 'credit' => 3000000],
         ]);
 
-        // 4. Budget untuk Maret 2026
+        // 4. Simulasi Penggunaan Kartu Kredit & Paylater (Hutang)
+        // Kartu Kredit terpakai 5.000.000 untuk beli HP/Elektronik (Expense)
+        $this->createJournal($workspaceId, "Beli Gadget dgn Kartu Kredit", $now->copy()->subDays(5)->format('Y-m-d'), [
+            ['account_id' => Account::where('code', '5440')->first()->id, 'debit' => 5000000, 'credit' => 0], // Belanja Pribadi
+            ['account_id' => $ccUtama->id, 'debit' => 0, 'credit' => 5000000], // Kartu Kredit Utama
+        ]);
+        
+        // Paylater terpakai 1.500.000 untuk Makan di Luar
+        $this->createJournal($workspaceId, "Traktir Keluarga (Paylater)", $now->copy()->subDays(2)->format('Y-m-d'), [
+            ['account_id' => $makanDiLuar->id, 'debit' => 1500000, 'credit' => 0],
+            ['account_id' => $paylater->id, 'debit' => 0, 'credit' => 1500000],
+        ]);
+
+        // 5. Budget untuk Bulan Ini
         Budget::create([
             'workspace_id' => $workspaceId,
             'account_id' => $belanjaBulanan->id,
             'amount' => 4000000,
-            'month' => 3,
-            'year' => 2026
+            'month' => $currentMonth,
+            'year' => $currentYear
         ]);
 
         Budget::create([
             'workspace_id' => $workspaceId,
-            'account_id' => $listrik->id,
-            'amount' => 1000000,
-            'month' => 3,
-            'year' => 2026
+            'account_id' => $makanDiLuar->id,
+            'amount' => 2000000,
+            'month' => $currentMonth,
+            'year' => $currentYear
         ]);
 
-        // 5. Recurring Transaction (Tagihan Rutin)
+        // 6. Recurring Transaction (Tagihan Rutin)
         RecurringTransaction::create([
             'workspace_id' => $workspaceId,
             'name' => 'Tagihan Internet MyRepublic',
             'description' => 'Biaya internet bulanan',
             'amount' => 450000,
             'debit_account_id' => $internet->id,
-            'credit_account_id' => $bankUtama->id,
+            'credit_account_id' => $ccUtama->id, // Bayar otomatis pakai CC
             'frequency' => 'monthly',
             'next_due_date' => Carbon::now()->addDays(3),
             'is_active' => true
         ]);
 
-        // 6. Installment (Cicilan KPR)
+        // 7. Installment (Cicilan KPR)
         Installment::create([
             'workspace_id' => $workspaceId,
             'name' => 'KPR Rumah Serpong',
@@ -111,12 +140,12 @@ class SampleDataSeeder extends Seeder
             'monthly_amount' => 5000000,
             'total_periods' => 180, // 15 years
             'remaining_periods' => 160,
-            'start_date' => '2024-07-01',
+            'start_date' => Carbon::now()->subMonths(20)->format('Y-m-d'),
             'interest_rate' => 8.5,
             'status' => 'active'
         ]);
 
-        // 7. Investment Asset
+        // 8. Investment Asset
         AssetHolding::create([
             'workspace_id' => $workspaceId,
             'account_id' => $emasFisik->id,
@@ -128,8 +157,25 @@ class SampleDataSeeder extends Seeder
             'current_price' => 1250000,
             'last_updated' => Carbon::now()
         ]);
+
+        $rumah = Account::where('code', '1410')->first(); // Rumah (Fixed Asset)
+        $kprLiability = Account::where('code', '2210')->first(); // KPR Liability
+
+        // 9. Initial Real Estate & KPR Recognition
+        if ($rumah && $kprLiability) {
+            $this->createJournal($workspaceId, "Pencatatan Beli Rumah KPR", Carbon::now()->subMonths(20)->format('Y-m-d'), [
+                ['account_id' => $rumah->id, 'debit' => 500000000, 'credit' => 0],
+                ['account_id' => $kprLiability->id, 'debit' => 0, 'credit' => 500000000],
+            ]);
+        }
+
+        // 10. Initial Gold Investment Recognition
+        $this->createJournal($workspaceId, "Pembukaan Aset Investasi Emas", Carbon::now()->subMonths(6)->format('Y-m-d'), [
+            ['account_id' => $emasFisik->id, 'debit' => 11000000, 'credit' => 0],
+            ['account_id' => $bankUtama->id, 'debit' => 0, 'credit' => 11000000],
+        ]);
         
-        $this->command->info('Sample financial data seeded successfully.');
+        $this->command->info('Sample financial data (including CC and Paylater) seeded successfully.');
     }
 
     private function createJournal($workspaceId, $desc, $date, $lines)

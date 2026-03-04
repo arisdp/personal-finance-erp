@@ -6,38 +6,31 @@ use App\Services\FinancialSummaryService;
 
 class DashboardController extends Controller
 {
-    protected $financialService;
-
-    public function __construct(FinancialSummaryService $financialService)
-    {
-        $this->financialService = $financialService;
-    }
-
-    public function index()
+    public function index(FinancialSummaryService $financialService)
     {
         // 1. Get Top Level Metrics
-        $totalCash = $this->financialService->getTotalCash();
-        $totalInvestment = $this->financialService->getTotalInvestment();
-        $totalDebt = $this->financialService->getTotalDebt();
-        $netWorth = $this->financialService->getNetWorth();
+        $totalCash = $financialService->getTotalCash();
+        $totalInvestment = $financialService->getTotalInvestment();
+        $totalDebt = $financialService->getTotalDebt();
+        $netWorth = $financialService->getNetWorth();
 
         // 2. Get Cashflow Data
-        $cashflowThisMonth = $this->financialService->getMonthlyCashflow();
+        $cashflowThisMonth = $financialService->getMonthlyCashflow();
         
         // 3. Get Emergency Fund Status
-        $emergencyFund = $this->financialService->getEmergencyFundStatus();
+        $emergencyFund = $financialService->getEmergencyFundStatus();
 
         // 4. Get Credit Card Info
-        $creditCards = $this->financialService->getCreditLimitSummary();
+        $creditCards = $financialService->getCreditLimitSummary();
 
         // 5. Get Budget Summary
-        $budgetSummary = $this->financialService->getBudgetSummary();
+        $budgetSummary = $financialService->getBudgetSummary();
 
         // 6. Get Upcoming Bills
-        $upcomingBills = $this->financialService->getUpcomingBills();
+        $upcomingBills = $financialService->getUpcomingBills();
 
         // 7. Get Installment Summary
-        $installmentSummary = $this->financialService->getInstallmentSummary();
+        $installmentSummary = $financialService->getInstallmentSummary();
 
         return view('dashboard.index', compact(
             'totalCash',

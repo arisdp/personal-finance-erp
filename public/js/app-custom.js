@@ -1,6 +1,6 @@
-$(document).ready(function() {
+$(document).ready(function () {
     // Global selector for all numeric inputs
-    $('.numeric-input').each(function() {
+    $('.numeric-input').each(function () {
         const input = $(this);
         const targetId = input.attr('id').replace('_display', '_hidden');
         const targetInput = $('#' + targetId);
@@ -18,8 +18,13 @@ $(document).ready(function() {
             unformatOnSubmit: true
         });
 
-        // Sync with hidden field on change
-        input.on('change', function() {
+        // Sync with hidden field on change and blur to prevent empty submit
+        input.on('keyup change blur', function () {
+            targetInput.val(an.getNumericString());
+        });
+
+        // Also sync on form submit just in case
+        input.closest('form').on('submit', function () {
             targetInput.val(an.getNumericString());
         });
 
