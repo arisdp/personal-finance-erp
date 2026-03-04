@@ -5,6 +5,10 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\RecurringTransactionController;
+use App\Http\Controllers\InstallmentController;
+use App\Http\Controllers\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +32,12 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('accounts', AccountController::class);
     Route::resource('journals', JournalController::class);
     Route::resource('budgets', BudgetController::class);
+    Route::resource('recurring', RecurringTransactionController::class);
+    Route::resource('installments', InstallmentController::class);
+    
+    // Smart Transactions
+    Route::get('transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
+    Route::post('transactions', [TransactionController::class, 'store'])->name('transactions.store');
 
     Route::get('ledger', [LedgerController::class, 'index'])
         ->name('ledger.index');

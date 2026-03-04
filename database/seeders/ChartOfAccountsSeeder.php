@@ -11,7 +11,10 @@ class ChartOfAccountsSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('accounts')->truncate();
+        // Truncate handles relationships if configured, but let's just delete to be safe
+        DB::table('journal_lines')->delete();
+        DB::table('journal_entries')->delete();
+        DB::table('accounts')->delete();
 
         $now = Carbon::now();
 
@@ -47,34 +50,34 @@ class ChartOfAccountsSeeder extends Seeder
 
         // Current Assets
         $currentAssets = $insert('1100', 'Current Assets', 'asset', 'asset', $assets, false);
-        $insert('1110', 'Kas Tunai', 'asset', 'asset', $currentAssets);
-        $insert('1120', 'Bank Utama', 'asset', 'asset', $currentAssets);
-        $insert('1130', 'Bank Tambahan', 'asset', 'asset', $currentAssets);
-        $insert('1140', 'E-Wallet Utama', 'asset', 'asset', $currentAssets);
+        $insert('1110', 'Kas Tunai', 'cash', 'asset', $currentAssets);
+        $insert('1120', 'Bank Utama', 'bank', 'asset', $currentAssets);
+        $insert('1130', 'Bank Tambahan', 'bank', 'asset', $currentAssets);
+        $insert('1140', 'E-Wallet Utama', 'ewallet', 'asset', $currentAssets);
 
         // Emergency Fund
         $emergency = $insert('1200', 'Emergency Fund', 'asset', 'asset', $assets, false);
-        $insert('1210', 'Dana Darurat Bank', 'asset', 'asset', $emergency);
-        $insert('1220', 'Dana Darurat Cash', 'asset', 'asset', $emergency);
-        $insert('1230', 'Dana Darurat Deposito', 'asset', 'asset', $emergency);
+        $insert('1210', 'Dana Darurat Bank', 'bank', 'asset', $emergency);
+        $insert('1220', 'Dana Darurat Cash', 'cash', 'asset', $emergency);
+        $insert('1230', 'Dana Darurat Deposito', 'bank', 'asset', $emergency);
 
         // Investment
         $investment = $insert('1300', 'Investment Assets', 'asset', 'asset', $assets, false);
-        $insert('1310', 'Emas Fisik', 'asset', 'asset', $investment);
-        $insert('1320', 'Emas Digital', 'asset', 'asset', $investment);
-        $insert('1330', 'Saham', 'asset', 'asset', $investment);
-        $insert('1340', 'Reksadana', 'asset', 'asset', $investment);
-        $insert('1350', 'Crypto', 'asset', 'asset', $investment);
-        $insert('1360', 'Deposito Investasi', 'asset', 'asset', $investment);
-        $insert('1370', 'Obligasi / SBN', 'asset', 'asset', $investment);
-        $insert('1380', 'Properti Investasi', 'asset', 'asset', $investment);
+        $insert('1310', 'Emas Fisik', 'investment', 'asset', $investment);
+        $insert('1320', 'Emas Digital', 'investment', 'asset', $investment);
+        $insert('1330', 'Saham', 'investment', 'asset', $investment);
+        $insert('1340', 'Reksadana', 'investment', 'asset', $investment);
+        $insert('1350', 'Crypto', 'investment', 'asset', $investment);
+        $insert('1360', 'Deposito Investasi', 'investment', 'asset', $investment);
+        $insert('1370', 'Obligasi / SBN', 'investment', 'asset', $investment);
+        $insert('1380', 'Properti Investasi', 'investment', 'asset', $investment);
 
         // Fixed Assets
         $fixed = $insert('1400', 'Fixed Assets', 'asset', 'asset', $assets, false);
-        $insert('1410', 'Rumah', 'asset', 'asset', $fixed);
-        $insert('1420', 'Kendaraan', 'asset', 'asset', $fixed);
-        $insert('1430', 'Peralatan Elektronik', 'asset', 'asset', $fixed);
-        $insert('1440', 'Tanah', 'asset', 'asset', $fixed);
+        $insert('1410', 'Rumah', 'fixed_asset', 'asset', $fixed);
+        $insert('1420', 'Kendaraan', 'fixed_asset', 'asset', $fixed);
+        $insert('1430', 'Peralatan Elektronik', 'fixed_asset', 'asset', $fixed);
+        $insert('1440', 'Tanah', 'fixed_asset', 'asset', $fixed);
 
         /*
         |--------------------------------------------------------------------------

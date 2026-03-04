@@ -85,7 +85,8 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text font-weight-bold">Rp</span>
                                     </div>
-                                    <input type="number" name="amount" id="amount" class="form-control text-right font-weight-bold" required min="1" placeholder="0">
+                                    <input type="text" id="amount_display" class="form-control text-right font-weight-bold numeric-input" required placeholder="0">
+                                    <input type="hidden" name="amount" id="amount_hidden">
                                 </div>
                             </div>
                         </div>
@@ -183,7 +184,7 @@
             e.preventDefault();
 
             let type = $('#transaction_type').val();
-            let amount = parseFloat($('#amount').val());
+            let amount = parseFloat($('#amount_hidden').val());
             let accA = $('#account_a').val();
             let accB = $('#account_b').val();
 

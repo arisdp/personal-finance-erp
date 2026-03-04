@@ -321,9 +321,17 @@ return [
         ],
 
         [
-            'text' => 'Journal Entries',
+            'text' => 'Smart Transaction',
+            'route' => 'transactions.create',
+            'icon' => 'fas fa-magic',
+            'label' => 'HOT',
+            'label_color' => 'success',
+        ],
+
+        [
+            'text' => 'Buku Jurnal',
             'route' => 'journals.index',
-            'icon' => 'fas fa-exchange-alt',
+            'icon' => 'fas fa-edit',
         ],
 
         [
@@ -336,6 +344,18 @@ return [
             'text' => 'Anggaran',
             'route' => 'budgets.index',
             'icon' => 'fas fa-bullseye',
+        ],
+
+        [
+            'text' => 'Tagihan Rutin',
+            'route' => 'recurring.index',
+            'icon' => 'fas fa-calendar-alt',
+        ],
+
+        [
+            'text' => 'Cicilan & Hutang',
+            'route' => 'installments.index',
+            'icon' => 'fas fa-credit-card',
         ],
 
         [
@@ -474,6 +494,21 @@ return [
                     'type' => 'js',
                     'asset' => false,
                     'location' => '//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js',
+                ],
+            ],
+        ],
+        'AutoNumeric' => [
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => false,
+                    'location' => '//cdn.jsdelivr.net/npm/autonumeric@4.6.0/dist/autoNumeric.min.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => 'js/app-custom.js',
                 ],
             ],
         ],

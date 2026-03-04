@@ -175,6 +175,46 @@ class FinancialSummaryService
     }
 
     /**
+     * Get Upcoming Bills (from Recurring Transactions)
+     */
+    public function getUpcomingBills(): array
+    {
+        if (!$this->workspaceId) return [];
+
+        return \App\Models\RecurringTransaction::where('workspace_id', $this->workspaceId)
+            ->where('is_active', true)
+            ->where('next_due_date', '<=', now()->addDays(7))
+            ->with(['debitAccount', 'creditAccount'])
+            ->orderBy('next_due_date', 'asc')
+            ->get()
+            ->toArray();
+    }
+
+    /**
+     * Get Installment Summary
+     */
+    public function getInstallmentSummary(): array
+    {
+        if (!$this->workspaceId) {
+            return [
+                'total_monthly' => 0.0,
+                'total_remaining' => 0.0,
+                'count' => 0
+            ];
+        }
+
+        $activeInstallments = \App\Models\Installment::where('workspace_id', $this->workspaceId)
+            ->where('status', 'active')
+            ->get();
+
+        return [
+            'total_monthly' => (float)$activeInstallments->sum('monthly_amount'),
+            'total_remaining' => (float)$activeInstallments->sum(fn($i) => $i->remaining_amount),
+            'count' => $activeInstallments->count()
+        ];
+    }
+
+    /**
      * Get Monthly Cashflow (Income & Expense)
      */
     public function getMonthlyCashflow(int $month = null, int $year = null): array

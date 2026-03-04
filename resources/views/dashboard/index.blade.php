@@ -176,58 +176,117 @@
 
     </div>
 
-    <!-- Barisan ke-3: Credit Card & Paylater Usage (User Request) -->
+    <!-- Barisan ke-3: Credit Card & Installment Summary -->
     <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card card-outline card-warning">
+        <div class="col-md-7">
+            <div class="card card-outline card-danger">
                 <div class="card-header">
                     <h3 class="card-title"><i class="fas fa-credit-card mr-1"></i> Penggunaan Kartu Kredit & Paylater</h3>
                 </div>
                 <div class="card-body p-0">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="pl-3">Akun</th>
+                                <th class="text-right">Used</th>
+                                <th class="text-right">Limit</th>
+                                <th width="25%">Usage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($creditCards as $cc)
+                            <tr>
+                                <td class="pl-3">{{ $cc['name'] }}</td>
+                                <td class="text-right font-weight-bold text-danger">Rp {{ number_format($cc['used'], 0, ',', '.') }}</td>
+                                <td class="text-right text-muted">Rp {{ number_format($cc['limit'], 0, ',', '.') }}</td>
+                                <td>
+                                    <div class="progress progress-xs mt-2" title="{{ $cc['usage_percent'] }}%">
+                                        <div class="progress-bar bg-danger" style="width: {{ $cc['usage_percent'] }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="text-center py-3 text-muted italic small">Data kartu kredit tidak ditemukan</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card card-outline card-purple">
+                <div class="card-header">
+                    <h3 class="card-title text-purple"><i class="fas fa-file-contract mr-1"></i> Ringkasan Cicilan (Hutang)</h3>
+                    <div class="card-tools">
+                        <a href="{{ route('installments.index') }}" class="btn btn-tool btn-sm"><i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="p-3 text-center border-bottom bg-light">
+                        <small class="text-uppercase text-muted d-block mb-1">Total Cicilan Bulanan</small>
+                        <h3 class="font-weight-bold mb-0 text-purple">Rp {{ number_format($installmentSummary['total_monthly'], 0, ',', '.') }}</h3>
+                        <small class="text-muted">{{ $installmentSummary['count'] }} Cicilan Aktif</small>
+                    </div>
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Total Sisa Hutang:</span>
+                            <span class="font-weight-bold text-danger">Rp {{ number_format($installmentSummary['total_remaining'], 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Barisan ke-4: Upcoming Bills Reminder (User Request) -->
+    @if(count($upcomingBills) > 0)
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card card-outline card-warning">
+                <div class="card-header">
+                    <h3 class="card-title text-warning"><i class="fas fa-bell mr-1"></i> Pengingat Tagihan (7 Hari Mendatang)</h3>
+                </div>
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="table table-sm table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th>Nama Kartu / Layanan</th>
-                                    <th class="text-right">Total Limit</th>
-                                    <th class="text-right">Digunakan</th>
-                                    <th class="text-right">Sisa Limit</th>
-                                    <th width="30%">Usage</th>
+                                    <th>Nama Tagihan</th>
+                                    <th>Jatuh Tempo</th>
+                                    <th class="text-right">Nominal</th>
+                                    <th class="text-center">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($creditCards as $card)
+                                @foreach($upcomingBills as $bill)
                                 <tr>
-                                    <td>{{ $card['name'] }}</td>
-                                    <td class="text-right text-muted">Rp {{ number_format($card['limit'], 0, ',', '.') }}</td>
-                                    <td class="text-right text-danger font-weight-bold">Rp {{ number_format($card['used'], 0, ',', '.') }}</td>
-                                    <td class="text-right text-success">Rp {{ number_format($card['available'], 0, ',', '.') }}</td>
-                                    <td>
-                                        <div class="progress progress-xs mt-2" title="{{ $card['usage_percent'] }}% Terpakai">
-                                            @php 
-                                                $barClass = 'bg-success'; 
-                                                if($card['usage_percent'] > 50) $barClass = 'bg-warning';
-                                                if($card['usage_percent'] > 80) $barClass = 'bg-danger';
-                                            @endphp
-                                            <div class="progress-bar {{ $barClass }}" style="width: {{ $card['usage_percent'] }}%"></div>
-                                        </div>
-                                        <small class="text-muted">{{ $card['usage_percent'] }}% terpakai</small>
+                                    <td class="pl-3">{{ $bill['name'] }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($bill['next_due_date'])->format('d M Y') }}</td>
+                                    <td class="text-right font-weight-bold">Rp {{ number_format($bill['amount'], 0, ',', '.') }}</td>
+                                    <td class="text-center">
+                                        @php $daysLeft = now()->diffInDays($bill['next_due_date'], false); @endphp
+                                        @if($daysLeft < 0)
+                                            <span class="badge badge-danger">Terlambat {{ abs($daysLeft) }} Hari</span>
+                                        @elseif($daysLeft == 0)
+                                            <span class="badge badge-warning">Hari Ini!</span>
+                                        @else
+                                            <span class="badge badge-info">{{ $daysLeft }} Hari Lagi</span>
+                                        @endif
                                     </td>
                                 </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">
-                                        <i class="fas fa-info-circle mr-1"></i> Belum ada akun yang diset untuk tracking limit.
-                                    </td>
-                                </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-    <!-- Barisan ke-4: Budget Monitoring (User Request) -->
+    </div>
+    @endif
+
+    <!-- Barisan ke-5: Budget Monitoring (User Request) -->
     <div class="row mt-4 mb-5">
         <div class="col-md-12">
             <div class="card card-outline card-info">

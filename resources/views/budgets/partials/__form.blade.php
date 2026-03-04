@@ -14,11 +14,17 @@
 </div>
 
 <div class="form-group">
-    <label for="amount">Alokasi Anggaran (Rp)</label>
-    <input type="number" name="amount" id="amount" class="form-control @error('amount') is-invalid @enderror" 
-           value="{{ old('amount', $budget->amount ?? '') }}" required min="0" step="0.01">
+    <label for="amount_display">Alokasi Anggaran (Rp)</label>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <span class="input-group-text">Rp</span>
+        </div>
+        <input type="text" id="amount_display" class="form-control numeric-input @error('amount') is-invalid @enderror" 
+            value="{{ old('amount', $budget->amount ?? '') }}" required>
+    </div>
+    <input type="hidden" name="amount" id="amount_hidden" value="{{ old('amount', $budget->amount ?? '') }}">
     @error('amount')
-        <span class="invalid-feedback">{{ $message }}</span>
+        <span class="invalid-feedback d-block">{{ $message }}</span>
     @enderror
 </div>
 

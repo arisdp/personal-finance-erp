@@ -66,13 +66,15 @@
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label>Harga Beli Rata-rata (Avg Price)</label>
-                                    <input type="number" step="0.01" name="avg_buy_price" class="form-control" placeholder="0.00" required>
+                                    <input type="text" id="avg_buy_price_display" class="form-control numeric-input" placeholder="0" required>
+                                    <input type="hidden" name="avg_buy_price" id="avg_buy_price_hidden">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label>Harga Pasar Saat Ini</label>
-                                    <input type="number" step="0.01" name="current_price" class="form-control" placeholder="0.00" required>
+                                    <input type="text" id="current_price_display" class="form-control numeric-input" placeholder="0" required>
+                                    <input type="hidden" name="current_price" id="current_price_hidden">
                                 </div>
                             </div>
                         </div>

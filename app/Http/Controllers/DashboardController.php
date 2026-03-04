@@ -33,6 +33,12 @@ class DashboardController extends Controller
         // 5. Get Budget Summary
         $budgetSummary = $this->financialService->getBudgetSummary();
 
+        // 6. Get Upcoming Bills
+        $upcomingBills = $this->financialService->getUpcomingBills();
+
+        // 7. Get Installment Summary
+        $installmentSummary = $this->financialService->getInstallmentSummary();
+
         return view('dashboard.index', compact(
             'totalCash',
             'totalInvestment',
@@ -41,7 +47,9 @@ class DashboardController extends Controller
             'cashflowThisMonth',
             'emergencyFund',
             'creditCards',
-            'budgetSummary'
+            'budgetSummary',
+            'upcomingBills',
+            'installmentSummary'
         ));
     }
 }
