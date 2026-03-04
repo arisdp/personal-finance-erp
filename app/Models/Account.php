@@ -70,40 +70,56 @@ class Account extends Model
     }
 
     /**
-     * Calculate Balance based on category
-     * Asset & Expense: Debit (+) - Credit (-)
-     * Liability, Equity, Income: Credit (+) - Debit (-)
+     * Calculate Balance with filters (Supports Date Range)
      */
-    public function getBalanceAttribute()
+    public function calculateBalance($workspaceId, $startDate = null, $endDate = null)
     {
         $isDebitNormal = in_array($this->category, ['asset', 'expense']);
         
-        $query = $this->journalLines();
-        
-        // Scope to active workspace if session exists
-        if (session()->has('active_workspace_id')) {
-            $query->whereHas('journalEntry', function($q) {
-                $q->where('workspace_id', session('active_workspace_id'));
-            });
-        }
+        $query = $this->journalLines()->whereHas('journalEntry', function($q) use ($workspaceId, $startDate, $endDate) {
+            $q->where('workspace_id', $workspaceId);
+            
+            // If only one date provided, treat as "As Of" (End Date)
+            if ($startDate && !$endDate) {
+                $q->where('date', '<=', $startDate);
+            } 
+            // If both provided, treat as range
+            elseif ($startDate && $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate]);
+            }
+        });
 
         if ($isDebitNormal) {
-            return $query->sum(DB::raw('debit - credit'));
+            return (float) $query->sum(DB::raw('debit - credit'));
         }
 
-        return $query->sum(DB::raw('credit - debit'));
+        return (float) $query->sum(DB::raw('credit - debit'));
+    }
+
+    /**
+     * Calculate Total Balance (Hierarchical) with filters
+     */
+    public function calculateTotalBalance($workspaceId, $startDate = null, $endDate = null)
+    {
+        $balance = $this->calculateBalance($workspaceId, $startDate, $endDate);
+        
+        foreach ($this->children as $child) {
+            $balance += $child->calculateTotalBalance($workspaceId, $startDate, $endDate);
+        }
+
+        return $balance;
+    }
+
+    // FIRE ACCESSOR: Calculate Balance based on category
+    public function getBalanceAttribute()
+    {
+        return $this->calculateBalance(session('active_workspace_id'));
     }
 
     // 🔥 Recursive Total Balance (Includes current account + all descendants)
     public function getTotalBalanceAttribute()
     {
-        $balance = $this->balance;
-        
-        foreach ($this->children as $child) {
-            $balance += $child->total_balance;
-        }
-
-        return $balance;
+        return $this->calculateTotalBalance(session('active_workspace_id'));
     }
 
     // Credit limit tracking

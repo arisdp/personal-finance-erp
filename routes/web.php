@@ -9,6 +9,8 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\InstallmentController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ProjectionController;
+use App\Http\Controllers\BankSyncController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +55,15 @@ Route::middleware(['auth'])->group(function () {
         ->name('reports.pl');
     Route::get('profit-loss/download-pdf', [ReportController::class, 'profitAndLossPdf'])
         ->name('reports.pl.pdf');
+
+    // Future Projections
+    Route::get('projections', [ProjectionController::class, 'index'])
+        ->name('reports.projections');
+
+    // Bank Sync
+    Route::get('bank-sync', [BankSyncController::class, 'index'])->name('bank_sync.index');
+    Route::post('bank-sync/preview', [BankSyncController::class, 'preview'])->name('bank_sync.preview');
+    Route::post('bank-sync/store', [BankSyncController::class, 'store'])->name('bank_sync.store');
 
     // Investment Routes
     Route::get('investments', [\App\Http\Controllers\AssetController::class, 'index'])->name('investments.index');

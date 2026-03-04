@@ -47,10 +47,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($incomeAccounts as $income)
-                            <tr>
-                                <td width="10%"><code>{{ $income['code'] }}</code></td>
-                                <td>{{ $income['name'] }}</td>
+                            @forelse($incomeData as $income)
+                            <tr class="{{ $income['is_parent'] ? 'font-weight-bold bg-light' : '' }}">
+                                <td width="15%"><code>{{ $income['code'] }}</code></td>
+                                <td style="padding-left: {{ 1.5 + ($income['level'] * 1.5) }}rem;">
+                                    {{ $income['name'] }}
+                                </td>
                                 <td class="text-right">Rp {{ number_format($income['amount'], 0, ',', '.') }}</td>
                             </tr>
                             @empty
@@ -66,17 +68,19 @@
                             </tr>
                         </tfoot>
 
-                        <thead class="bg-light">
+                        <thead class="bg-light border-top">
                             <tr>
                                 <th colspan="2" class="pt-4">PENGELUARAN (EXPENSES)</th>
                                 <th class="text-right pt-4">NOMINAL</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($expenseAccounts as $expense)
-                            <tr>
-                                <td><code>{{ $expense['code'] }}</code></td>
-                                <td>{{ $expense['name'] }}</td>
+                            @forelse($expenseData as $expense)
+                            <tr class="{{ $expense['is_parent'] ? 'font-weight-bold bg-light' : '' }}">
+                                <td width="15%"><code>{{ $expense['code'] }}</code></td>
+                                <td style="padding-left: {{ 1.5 + ($expense['level'] * 1.5) }}rem;">
+                                    {{ $expense['name'] }}
+                                </td>
                                 <td class="text-right">Rp {{ number_format($expense['amount'], 0, ',', '.') }}</td>
                             </tr>
                             @empty

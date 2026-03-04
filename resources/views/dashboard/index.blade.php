@@ -184,34 +184,36 @@
                     <h3 class="card-title"><i class="fas fa-credit-card mr-1"></i> Penggunaan Kartu Kredit & Paylater</h3>
                 </div>
                 <div class="card-body p-0">
-                    <table class="table table-sm table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th class="pl-3">Akun</th>
-                                <th class="text-right">Used</th>
-                                <th class="text-right">Limit</th>
-                                <th width="25%">Usage</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($creditCards as $cc)
-                            <tr>
-                                <td class="pl-3">{{ $cc['name'] }}</td>
-                                <td class="text-right font-weight-bold text-danger">Rp {{ number_format($cc['used'], 0, ',', '.') }}</td>
-                                <td class="text-right text-muted">Rp {{ number_format($cc['limit'], 0, ',', '.') }}</td>
-                                <td>
-                                    <div class="progress progress-xs mt-2" title="{{ $cc['usage_percent'] }}%">
-                                        <div class="progress-bar bg-danger" style="width: {{ $cc['usage_percent'] }}%"></div>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="4" class="text-center py-3 text-muted italic small">Data kartu kredit tidak ditemukan</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="pl-3">Akun</th>
+                                    <th class="text-right">Used</th>
+                                    <th class="text-right">Limit</th>
+                                    <th width="25%">Usage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($creditCards as $cc)
+                                <tr>
+                                    <td class="pl-3">{{ $cc['name'] }}</td>
+                                    <td class="text-right font-weight-bold text-danger">Rp {{ number_format($cc['used'], 0, ',', '.') }}</td>
+                                    <td class="text-right text-muted">Rp {{ number_format($cc['limit'], 0, ',', '.') }}</td>
+                                    <td>
+                                        <div class="progress progress-xs mt-2" title="{{ $cc['usage_percent'] }}%">
+                                            <div class="progress-bar bg-danger" style="width: {{ $cc['usage_percent'] }}%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="4" class="text-center py-3 text-muted italic small">Data kartu kredit tidak ditemukan</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

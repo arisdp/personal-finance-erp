@@ -44,9 +44,17 @@
                 </thead>
                 <tbody>
                     @forelse($reportData as $row)
-                    <tr>
-                        <td><code>{{ $row['code'] }}</code></td>
-                        <td>{{ $row['name'] }}</td>
+                    <tr class="{{ !$row['is_postable'] ? 'font-weight-bold bg-light' : '' }}">
+                        <td>
+                            <span style="margin-left: {{ $row['level'] * 20 }}px;">
+                                <code>{{ $row['code'] }}</code>
+                            </span>
+                        </td>
+                        <td>
+                            <span style="margin-left: {{ $row['level'] * 20 }}px;">
+                                {{ $row['name'] }}
+                            </span>
+                        </td>
                         <td class="text-right">
                             {{ $row['debit'] > 0 ? 'Rp ' . number_format($row['debit'], 0, ',', '.') : '-' }}
                         </td>

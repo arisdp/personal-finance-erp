@@ -42,132 +42,176 @@ class ChartOfAccountsSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
-        | ASSETS
+        | ASSETS (1000)
         |--------------------------------------------------------------------------
         */
+        $assets = $insert('1000', 'AKTIVA (ASSETS)', 'asset', 'asset', null, false);
 
-        $assets = $insert('1000', 'ASSETS', 'asset', 'asset', null, false);
+        // Kas dan Bank
+        $cashBank = $insert('1100', 'KAS DAN BANK', 'asset', 'asset', $assets, false);
+        
+        $kasTunaiGroup = $insert('1110', 'KAS TUNAI', 'asset', 'asset', $cashBank, false);
+        $insert('1111', 'Kas Tunai (Dompet)', 'cash', 'asset', $kasTunaiGroup);
+        
+        $bankUmumGroup = $insert('1120', 'BANK UMUM / KONVENSIONAL', 'asset', 'asset', $cashBank, false);
+        $insert('1121', 'Bank Mandiri (Utama)', 'bank', 'asset', $bankUmumGroup);
+        $insert('1122', 'Bank BCA', 'bank', 'asset', $bankUmumGroup);
+        $insert('1123', 'Bank BNI', 'bank', 'asset', $bankUmumGroup);
+        $insert('1124', 'Bank BRI', 'bank', 'asset', $bankUmumGroup);
+        $insert('1125', 'Bank CIMB Niaga', 'bank', 'asset', $bankUmumGroup);
 
-        // Current Assets
-        $currentAssets = $insert('1100', 'Current Assets', 'asset', 'asset', $assets, false);
-        $insert('1110', 'Kas Tunai', 'cash', 'asset', $currentAssets);
-        $insert('1120', 'Bank Utama', 'bank', 'asset', $currentAssets);
-        $insert('1130', 'Bank Tambahan', 'bank', 'asset', $currentAssets);
-        $insert('1140', 'E-Wallet Utama', 'ewallet', 'asset', $currentAssets);
+        $bankDigitalGroup = $insert('1130', 'BANK DIGITAL', 'asset', 'asset', $cashBank, false);
+        $insert('1131', 'SeaBank', 'bank', 'asset', $bankDigitalGroup);
+        $insert('1132', 'Bank Jago', 'bank', 'asset', $bankDigitalGroup);
+        $insert('1133', 'Blu by BCA Digital', 'bank', 'asset', $bankDigitalGroup);
+        $insert('1134', 'Bank Aladin Digital', 'bank', 'asset', $bankDigitalGroup);
+        $insert('1135', 'Bank Neo Commerce', 'bank', 'asset', $bankDigitalGroup);
+        
+        $ewalletGroup = $insert('1140', 'E-WALLET', 'asset', 'asset', $cashBank, false);
+        $insert('1141', 'Gopay', 'ewallet', 'asset', $ewalletGroup);
+        $insert('1142', 'OVO', 'ewallet', 'asset', $ewalletGroup);
+        $insert('1143', 'ShopeePay', 'ewallet', 'asset', $ewalletGroup);
+        $insert('1144', 'Dana', 'ewallet', 'asset', $ewalletGroup);
+        $insert('1145', 'LinkAja', 'ewallet', 'asset', $ewalletGroup);
 
-        // Emergency Fund
-        $emergency = $insert('1200', 'Emergency Fund', 'asset', 'asset', $assets, false);
-        $insert('1210', 'Dana Darurat Bank', 'bank', 'asset', $emergency);
-        $insert('1220', 'Dana Darurat Cash', 'cash', 'asset', $emergency);
-        $insert('1230', 'Dana Darurat Deposito', 'bank', 'asset', $emergency);
+        // Piutang
+        $receivables = $insert('1200', 'PIUTANG', 'asset', 'asset', $assets, false);
+        $insert('1210', 'Piutang Teman/Keluarga', 'asset', 'asset', $receivables);
 
-        // Investment
-        $investment = $insert('1300', 'Investment Assets', 'asset', 'asset', $assets, false);
-        $insert('1310', 'Emas Fisik', 'investment', 'asset', $investment);
-        $insert('1320', 'Emas Digital', 'investment', 'asset', $investment);
-        $insert('1330', 'Saham', 'investment', 'asset', $investment);
-        $insert('1340', 'Reksadana', 'investment', 'asset', $investment);
-        $insert('1350', 'Crypto', 'investment', 'asset', $investment);
-        $insert('1360', 'Deposito Investasi', 'investment', 'asset', $investment);
-        $insert('1370', 'Obligasi / SBN', 'investment', 'asset', $investment);
-        $insert('1380', 'Properti Investasi', 'investment', 'asset', $investment);
+        // Investasi
+        $investments = $insert('1300', 'INVESTASI', 'asset', 'asset', $assets, false);
+        
+        $emas = $insert('1310', 'INVESTASI EMAS', 'asset', 'asset', $investments, false);
+        $insert('1311', 'Emas Fisik (Antam)', 'investment', 'asset', $emas);
+        $insert('1312', 'Emas Digital (Pegadaian)', 'investment', 'asset', $emas);
 
-        // Fixed Assets
-        $fixed = $insert('1400', 'Fixed Assets', 'asset', 'asset', $assets, false);
-        $insert('1410', 'Rumah', 'fixed_asset', 'asset', $fixed);
-        $insert('1420', 'Kendaraan', 'fixed_asset', 'asset', $fixed);
-        $insert('1430', 'Peralatan Elektronik', 'fixed_asset', 'asset', $fixed);
-        $insert('1440', 'Tanah', 'fixed_asset', 'asset', $fixed);
+        $pasarModal = $insert('1320', 'INVESTASI PASAR MODAL', 'asset', 'asset', $investments, false);
+        $insert('1321', 'Saham (Stock)', 'investment', 'asset', $pasarModal);
+        $insert('1322', 'Reksadana', 'investment', 'asset', $pasarModal);
+        $insert('1323', 'Obligasi / SBN', 'investment', 'asset', $pasarModal);
+        $insert('1324', 'Rekening Dana Nasabah (RDN)', 'bank', 'asset', $pasarModal);
+
+        $crypto = $insert('1330', 'INVESTASI CRYPTO', 'asset', 'asset', $investments, false);
+        $insert('1331', 'Bitcoin (BTC)', 'investment', 'asset', $crypto);
+        $insert('1332', 'Ethereum (ETH)', 'investment', 'asset', $crypto);
+        $insert('1333', 'Stablecoin (USDT/USDC)', 'investment', 'asset', $crypto);
+
+        $p2pLending = $insert('1340', 'INVESTASI P2P LENDING', 'asset', 'asset', $investments, false);
+        $insert('1341', 'Amartha', 'investment', 'asset', $p2pLending);
+        $insert('1342', 'Modalku', 'investment', 'asset', $p2pLending);
+        $insert('1343', 'Asetku', 'investment', 'asset', $p2pLending);
+
+        // Aset Tetap
+        $fixedAssets = $insert('1400', 'ASET TETAP', 'fixed_asset', 'asset', $assets, false);
+        $insert('1411', 'Tanah', 'fixed_asset', 'asset', $fixedAssets);
+        $insert('1412', 'Bangunan (Rumah/Apartemen)', 'fixed_asset', 'asset', $fixedAssets);
+        $insert('1421', 'Mobil', 'fixed_asset', 'asset', $fixedAssets);
+        $insert('1422', 'Sepeda Motor', 'fixed_asset', 'asset', $fixedAssets);
+        $insert('1430', 'Peralatan, Gadget & Elektronik', 'fixed_asset', 'asset', $fixedAssets);
+
+        // Dana Darurat
+        $emergencyFunds = $insert('1500', 'DANA DARURAT', 'asset', 'asset', $assets, false);
+        $insert('1510', 'Dana Darurat (Tabungan Bank)', 'bank', 'asset', $emergencyFunds);
+        $insert('1520', 'Dana Darurat (Logam Mulia)', 'investment', 'asset', $emergencyFunds);
 
         /*
         |--------------------------------------------------------------------------
-        | LIABILITIES
+        | LIABILITIES (2000)
         |--------------------------------------------------------------------------
         */
+        $liabilities = $insert('2000', 'KEWAJIBAN (LIABILITIES)', 'liability', 'liability', null, false);
 
-        $liabilities = $insert('2000', 'LIABILITIES', 'liability', 'liability', null, false);
+        // Hutang Jangka Pendek
+        $currentLiab = $insert('2100', 'HUTANG JANGKA PENDEK', 'liability', 'liability', $liabilities, false);
+        
+        $creditCards = $insert('2110', 'KARTU KREDIT', 'liability', 'liability', $currentLiab, false);
+        $insert('2111', 'Kartu Kredit Mandiri', 'liability', 'liability', $creditCards, true, 20000000, true);
+        $insert('2112', 'Kartu Kredit BCA', 'liability', 'liability', $creditCards, true, 10000000, true);
 
-        // Short Term
-        $shortTerm = $insert('2100', 'Short Term Liabilities', 'liability', 'liability', $liabilities, false);
-        $insert('2110', 'Kartu Kredit Utama', 'liability', 'liability', $shortTerm, true, 20000000, true);
-        $insert('2120', 'Kartu Kredit Tambahan', 'liability', 'liability', $shortTerm, true, 10000000, true);
-        $insert('2130', 'Paylater Shopee', 'liability', 'liability', $shortTerm, true, 5000000, true);
-        $insert('2140', 'Paylater Tokopedia', 'liability', 'liability', $shortTerm, true, 5000000, true);
+        $paylaters = $insert('2120', 'PAYLATER & PINJOL', 'liability', 'liability', $currentLiab, false);
+        $insert('2121', 'Shopee Paylater', 'liability', 'liability', $paylaters, true, 5000000, true);
+        $insert('2122', 'Traveloka Paylater', 'liability', 'liability', $paylaters, true, 5000000, true);
+        $insert('2123', 'Kredivo', 'liability', 'liability', $paylaters, true, 10000000, true);
+        $insert('2124', 'Akulaku', 'liability', 'liability', $paylaters, true, 5000000, true);
+        $insert('2125', 'GoPay Later', 'liability', 'liability', $paylaters, true, 2000000, true);
 
-        // Long Term
-        $longTerm = $insert('2200', 'Long Term Liabilities', 'liability', 'liability', $liabilities, false);
-        $insert('2210', 'KPR', 'liability', 'liability', $longTerm);
-        $insert('2220', 'Kredit Kendaraan', 'liability', 'liability', $longTerm);
-        $insert('2230', 'Pinjaman Keluarga', 'liability', 'liability', $longTerm);
-        $insert('2240', 'Pinjaman Bank', 'liability', 'liability', $longTerm);
+        // Hutang Jangka Panjang
+        $longTermLiab = $insert('2200', 'HUTANG JANGKA PANJANG', 'liability', 'liability', $liabilities, false);
+        $insert('2210', 'KPR Rumah', 'liability', 'liability', $longTermLiab);
+        $insert('2221', 'Cicilan Mobil', 'liability', 'liability', $longTermLiab);
+        $insert('2222', 'Cicilan Motor', 'liability', 'liability', $longTermLiab);
+        $insert('2230', 'Pinjaman Bank (Multiguna)', 'liability', 'liability', $longTermLiab);
 
         /*
         |--------------------------------------------------------------------------
-        | EQUITY
+        | EQUITY (3000)
         |--------------------------------------------------------------------------
         */
-
-        $equity = $insert('3000', 'EQUITY', 'equity', 'equity', null, false);
-        $insert('3100', 'Modal Awal Keluarga', 'equity', 'equity', $equity);
-        $insert('3200', 'Laba Ditahan', 'equity', 'equity', $equity);
-        $insert('3300', 'Penarikan Pribadi', 'equity', 'equity', $equity);
+        $equity = $insert('3000', 'EKUITAS (EQUITY)', 'equity', 'equity', null, false);
+        $insert('3100', 'Modal / Kekayaan Awal', 'equity', 'equity', $equity);
+        $insert('3200', 'Laba Ditahan (Saldo Laba)', 'equity', 'equity', $equity);
 
         /*
         |--------------------------------------------------------------------------
-        | INCOME
+        | INCOME (4000)
         |--------------------------------------------------------------------------
         */
+        $income = $insert('4000', 'PENDAPATAN (INCOME)', 'income', 'income', null, false);
+        
+        $activeIncome = $insert('4100', 'PENDAPATAN AKTIF', 'income', 'income', $income, false);
+        $insert('4110', 'Gaji Pokok', 'income', 'income', $activeIncome);
+        $insert('4120', 'Bonus & THR', 'income', 'income', $activeIncome);
+        $insert('4130', 'Pendapatan Sampingan', 'income', 'income', $activeIncome);
 
-        $income = $insert('4000', 'INCOME', 'income', 'income', null, false);
-        $insert('4100', 'Gaji Suami', 'income', 'income', $income);
-        $insert('4110', 'Gaji Istri', 'income', 'income', $income);
-        $insert('4120', 'Bonus', 'income', 'income', $income);
-        $insert('4130', 'Dividen', 'income', 'income', $income);
-        $insert('4140', 'Profit Saham', 'income', 'income', $income);
-        $insert('4150', 'Profit Crypto', 'income', 'income', $income);
-        $insert('4160', 'Sewa Properti', 'income', 'income', $income);
-        $insert('4170', 'Pendapatan Lain', 'income', 'income', $income);
+        $passiveIncome = $insert('4200', 'PENDAPATAN PASIF', 'income', 'income', $income, false);
+        $insert('4210', 'Dividen Saham', 'income', 'income', $passiveIncome);
+        $insert('4220', 'Kupon Obligasi', 'income', 'income', $passiveIncome);
+        $insert('4230', 'Hasil Sewa', 'income', 'income', $passiveIncome);
 
         /*
         |--------------------------------------------------------------------------
-        | EXPENSE
+        | EXPENSE (5000)
         |--------------------------------------------------------------------------
         */
+        $expense = $insert('5000', 'BEBAN (EXPENSES)', 'expense', 'expense', null, false);
 
-        $expense = $insert('5000', 'EXPENSE', 'expense', 'expense', null, false);
+        // Pengeluaran Rutin
+        $fixedExpense = $insert('5100', 'PENGELUARAN RUTIN (FIXED)', 'expense', 'expense', $expense, false);
+        $insert('5110', 'Zakat, Infaq & Sedekah', 'expense', 'expense', $fixedExpense);
+        $insert('5120', 'Listrik, Air & WiFi', 'expense', 'expense', $fixedExpense);
+        $insert('5131', 'Belanja Dapur / Sembako', 'expense', 'expense', $fixedExpense);
+        $insert('5132', 'Laundry & Kebersihan', 'expense', 'expense', $fixedExpense);
+        $insert('5133', 'Gas & Air Galon', 'expense', 'expense', $fixedExpense);
+        $insert('5140', 'Iuran Lingkungan / Keamanan', 'expense', 'expense', $fixedExpense);
+        $insert('5150', 'Pulsa & Paket Data', 'expense', 'expense', $fixedExpense);
 
-        // Rumah Tangga
-        $rumahTangga = $insert('5100', 'Rumah Tangga', 'expense', 'expense', $expense, false);
-        $insert('5110', 'Belanja Bulanan', 'expense', 'expense', $rumahTangga);
-        $insert('5120', 'Listrik', 'expense', 'expense', $rumahTangga);
-        $insert('5130', 'Air', 'expense', 'expense', $rumahTangga);
-        $insert('5140', 'Internet', 'expense', 'expense', $rumahTangga);
-        $insert('5150', 'Gas', 'expense', 'expense', $rumahTangga);
+        // Pengeluaran Lifestyle
+        $lifestyle = $insert('5200', 'GAYA HIDUP (VARIABLE)', 'expense', 'expense', $expense, false);
+        $insert('5210', 'Makan di Luar (Dining)', 'expense', 'expense', $lifestyle);
+        $insert('5221', 'Streaming (Netflix/Spotify)', 'expense', 'expense', $lifestyle);
+        $insert('5222', 'Hiburan / Bioskop', 'expense', 'expense', $lifestyle);
+        $insert('5223', 'Hobi & Games', 'expense', 'expense', $lifestyle);
+        $insert('5230', 'Olahraga (Gym/Sport)', 'expense', 'expense', $lifestyle);
+        $insert('5241', 'Pakaian & Fashion', 'expense', 'expense', $lifestyle);
+        $insert('5242', 'Perawatan Diri (Skincare/Barber)', 'expense', 'expense', $lifestyle);
 
-        // Pendidikan
-        $pendidikan = $insert('5200', 'Pendidikan', 'expense', 'expense', $expense, false);
-        $insert('5210', 'SPP', 'expense', 'expense', $pendidikan);
-        $insert('5220', 'Buku', 'expense', 'expense', $pendidikan);
-        $insert('5230', 'Les', 'expense', 'expense', $pendidikan);
+        // Pengeluaran Pendidikan & Kesehatan
+        $social = $insert('5300', 'PENDIDIKAN & KESEHATAN', 'expense', 'expense', $expense, false);
+        $insert('5310', 'Pendidikan Anak', 'expense', 'expense', $social);
+        $insert('5320', 'Kesehatan / Obat-obatan', 'expense', 'expense', $social);
 
-        // Transportasi
-        $transport = $insert('5300', 'Transportasi', 'expense', 'expense', $expense, false);
-        $insert('5310', 'BBM', 'expense', 'expense', $transport);
-        $insert('5320', 'Servis Kendaraan', 'expense', 'expense', $transport);
-        $insert('5330', 'Parkir', 'expense', 'expense', $transport);
+        // Cicilan Bunga & Adm
+        $financialCost = $insert('5400', 'BIAYA FINANSIAL', 'expense', 'expense', $expense, false);
+        $insert('5410', 'Bunga Hutang / Cicilan', 'expense', 'expense', $financialCost);
+        $insert('5420', 'Biaya Admin Bank', 'expense', 'expense', $financialCost);
+        $insert('5430', 'Pajak Kendaraan/PBB', 'expense', 'expense', $financialCost);
 
-        // Gaya Hidup
-        $gayaHidup = $insert('5400', 'Gaya Hidup', 'expense', 'expense', $expense, false);
-        $insert('5410', 'Makan di Luar', 'expense', 'expense', $gayaHidup);
-        $insert('5420', 'Hiburan', 'expense', 'expense', $gayaHidup);
-        $insert('5430', 'Liburan', 'expense', 'expense', $gayaHidup);
-        $insert('5440', 'Belanja Pribadi', 'expense', 'expense', $gayaHidup);
-
-        // Cicilan
-        $cicilan = $insert('5500', 'Cicilan & Hutang', 'expense', 'expense', $expense, false);
-        $insert('5510', 'Cicilan KPR', 'expense', 'expense', $cicilan);
-        $insert('5520', 'Cicilan Kendaraan', 'expense', 'expense', $cicilan);
-        $insert('5530', 'Pembayaran Kartu Kredit', 'expense', 'expense', $cicilan);
-        $insert('5540', 'Pembayaran Paylater', 'expense', 'expense', $cicilan);
+        // Pengeluaran Cicilan & Hutang (Cashflow tracing)
+        $debtPayments = $insert('5500', 'PENGELUARAN CICILAN & HUTANG', 'expense', 'expense', $expense, false);
+        $insert('5510', 'Pembayaran Kartu Kredit', 'expense', 'expense', $debtPayments);
+        $insert('5520', 'Pembayaran Paylater', 'expense', 'expense', $debtPayments);
+        $insert('5530', 'Cicilan KPR (Pokok+Bunga)', 'expense', 'expense', $debtPayments);
+        $insert('5540', 'Cicilan Kendaraan', 'expense', 'expense', $debtPayments);
+        $insert('5550', 'Cicilan Pinjaman Lainnya', 'expense', 'expense', $debtPayments);
     }
 }

@@ -7,6 +7,7 @@ use App\Models\JournalLine;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -18,52 +19,71 @@ class ReportController extends Controller
         $workspaceId = session('active_workspace_id');
         $asOfDate = $request->input('date', Carbon::now()->format('Y-m-d'));
 
-        // Fetch all postable accounts
-        $accounts = Account::where('is_postable', true)
-            ->with(['journalLines' => function($query) use ($workspaceId, $asOfDate) {
-                $query->whereHas('journalEntry', function($q) use ($workspaceId, $asOfDate) {
-                    $q->where('workspace_id', $workspaceId)
-                      ->where('date', '<=', $asOfDate);
-                });
-            }])
+        // Fetch top-level accounts
+        $accounts = Account::whereNull('parent_id')
             ->orderBy('code')
             ->get();
 
-        $reportData = $accounts->map(function($account) {
-            $sumDebit = $account->journalLines->sum('debit');
-            $sumCredit = $account->journalLines->sum('credit');
-            
+        $reportData = $this->buildHierarchicalTrialBalance($accounts, $workspaceId, $asOfDate);
+
+        // Calculate Totals from top-level accounts only to avoid double counting
+        $totalDebit = 0;
+        $totalCredit = 0;
+
+        foreach ($accounts as $account) {
+            $balance = $account->calculateTotalBalance($workspaceId, $asOfDate);
+            if (in_array($account->category, ['asset', 'expense'])) {
+                if ($balance >= 0) $totalDebit += $balance;
+                else $totalCredit += abs($balance);
+            } else {
+                if ($balance >= 0) $totalCredit += $balance;
+                else $totalDebit += abs($balance);
+            }
+        }
+
+        return view('reports.trial_balance', compact('reportData', 'asOfDate', 'totalDebit', 'totalCredit'));
+    }
+
+    private function buildHierarchicalTrialBalance($accounts, $workspaceId, $asOfDate, $level = 0)
+    {
+        $data = [];
+
+        foreach ($accounts as $account) {
+            $totalBalance = $account->calculateTotalBalance($workspaceId, $asOfDate);
+
+            // Skip if no balance and no activity in current month
+            if ($totalBalance == 0 && $account->calculateBalance($workspaceId, $asOfDate) == 0) {
+                if ($account->children->isEmpty()) continue;
+            }
+
             $debitBalance = 0;
             $creditBalance = 0;
 
-            // Logic for Normal Balance
-            // Asset/Expense normally Debit
             if (in_array($account->category, ['asset', 'expense'])) {
-                $balance = $sumDebit - $sumCredit;
-                if ($balance >= 0) $debitBalance = $balance;
-                else $creditBalance = abs($balance);
+                if ($totalBalance >= 0) $debitBalance = $totalBalance;
+                else $creditBalance = abs($totalBalance);
             } else {
-                // Liability/Equity/Income normally Credit
-                $balance = $sumCredit - $sumDebit;
-                if ($balance >= 0) $creditBalance = $balance;
-                else $debitBalance = abs($balance);
+                if ($totalBalance >= 0) $creditBalance = $totalBalance;
+                else $debitBalance = abs($totalBalance);
             }
 
-            return [
+            $data[] = [
                 'code' => $account->code,
                 'name' => $account->name,
                 'category' => $account->category,
                 'debit' => $debitBalance,
-                'credit' => $creditBalance
+                'credit' => $creditBalance,
+                'level' => $level,
+                'is_postable' => $account->is_postable
             ];
-        })->filter(function($row) {
-            return $row['debit'] > 0 || $row['credit'] > 0;
-        });
 
-        $totalDebit = $reportData->sum('debit');
-        $totalCredit = $reportData->sum('credit');
+            if ($account->children->isNotEmpty()) {
+                $childrenData = $this->buildHierarchicalTrialBalance($account->children()->orderBy('code')->get(), $workspaceId, $asOfDate, $level + 1);
+                $data = array_merge($data, $childrenData);
+            }
+        }
 
-        return view('reports.trial_balance', compact('reportData', 'asOfDate', 'totalDebit', 'totalCredit'));
+        return $data;
     }
 
     /**
@@ -75,45 +95,37 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
 
-        // Get Income Accounts
-        $incomeAccounts = Account::where('category', 'income')
+        // Get top-level Income accounts
+        $incomeRoots = Account::where('category', 'income')
+            ->whereNull('parent_id')
             ->orderBy('code')
-            ->get()
-            ->map(function($account) use ($workspaceId, $startDate, $endDate) {
-                $amount = JournalLine::where('account_id', $account->id)
-                    ->whereHas('journalEntry', function($q) use ($workspaceId, $startDate, $endDate) {
-                        $q->where('workspace_id', $workspaceId)
-                          ->whereBetween('date', [$startDate, $endDate]);
-                    })
-                    ->selectRaw('SUM(credit - debit) as total')
-                    ->value('total') ?? 0;
-                
-                return ['name' => $account->name, 'code' => $account->code, 'amount' => (float)$amount];
-            })->filter(fn($a) => $a['amount'] != 0);
-
-        // Get Expense Accounts
-        $expenseAccounts = Account::where('category', 'expense')
+            ->get();
+            
+        // Get top-level Expense accounts
+        $expenseRoots = Account::where('category', 'expense')
+            ->whereNull('parent_id')
             ->orderBy('code')
-            ->get()
-            ->map(function($account) use ($workspaceId, $startDate, $endDate) {
-                $amount = JournalLine::where('account_id', $account->id)
-                    ->whereHas('journalEntry', function($q) use ($workspaceId, $startDate, $endDate) {
-                        $q->where('workspace_id', $workspaceId)
-                          ->whereBetween('date', [$startDate, $endDate]);
-                    })
-                    ->selectRaw('SUM(debit - credit) as total')
-                    ->value('total') ?? 0;
-                
-                return ['name' => $account->name, 'code' => $account->code, 'amount' => (float)$amount];
-            })->filter(fn($a) => $a['amount'] != 0);
+            ->get();
 
-        $totalIncome = $incomeAccounts->sum('amount');
-        $totalExpense = $expenseAccounts->sum('amount');
+        $incomeData = [];
+        $totalIncome = 0;
+        foreach ($incomeRoots as $root) {
+            $this->buildHierarchicalPL($root, $workspaceId, $startDate, $endDate, 0, $incomeData);
+            $totalIncome += $root->calculateTotalBalance($workspaceId, $startDate, $endDate);
+        }
+
+        $expenseData = [];
+        $totalExpense = 0;
+        foreach ($expenseRoots as $root) {
+            $this->buildHierarchicalPL($root, $workspaceId, $startDate, $endDate, 0, $expenseData);
+            $totalExpense += $root->calculateTotalBalance($workspaceId, $startDate, $endDate);
+        }
+
         $netProfit = $totalIncome - $totalExpense;
 
         return view('reports.profit_loss', compact(
-            'incomeAccounts', 
-            'expenseAccounts', 
+            'incomeData', 
+            'expenseData', 
             'totalIncome', 
             'totalExpense', 
             'netProfit',
@@ -122,76 +134,103 @@ class ReportController extends Controller
         ));
     }
 
+    private function buildHierarchicalPL($account, $workspaceId, $startDate, $endDate, $level, &$dataArray)
+    {
+        $balance = $account->calculateTotalBalance($workspaceId, $startDate, $endDate);
+        $displayBalance = abs($balance);
+
+        if ($displayBalance != 0) {
+            $dataArray[] = [
+                'id' => $account->id,
+                'code' => $account->code,
+                'name' => $account->name,
+                'amount' => $displayBalance,
+                'level' => $level,
+                'is_parent' => $account->children()->count() > 0
+            ];
+
+            foreach ($account->children()->orderBy('code')->get() as $child) {
+                $this->buildHierarchicalPL($child, $workspaceId, $startDate, $endDate, $level + 1, $dataArray);
+            }
+        }
+    }
+
+    /**
+     * Trial Balance PDF
+     */
     public function trialBalancePdf(Request $request)
     {
         $workspaceId = session('active_workspace_id');
         $asOfDate = $request->input('date', Carbon::now()->format('Y-m-d'));
 
-        $accounts = Account::where('is_postable', true)
-            ->with(['journalLines' => function($query) use ($workspaceId, $asOfDate) {
-                $query->whereHas('journalEntry', function($q) use ($workspaceId, $asOfDate) {
-                    $q->where('workspace_id', $workspaceId)
-                      ->where('date', '<=', $asOfDate);
-                });
-            }])
+        $accounts = Account::whereNull('parent_id')
             ->orderBy('code')
             ->get();
 
-        $reportData = $accounts->map(function($account) {
-            $sumDebit = $account->journalLines->sum('debit');
-            $sumCredit = $account->journalLines->sum('credit');
-            $debitBalance = 0;
-            $creditBalance = 0;
+        $reportData = $this->buildHierarchicalTrialBalance($accounts, $workspaceId, $asOfDate);
 
+        $totalDebit = 0;
+        $totalCredit = 0;
+        foreach ($accounts as $account) {
+            $balance = $account->calculateTotalBalance($workspaceId, $asOfDate);
             if (in_array($account->category, ['asset', 'expense'])) {
-                $balance = $sumDebit - $sumCredit;
-                if ($balance >= 0) $debitBalance = $balance;
-                else $creditBalance = abs($balance);
+                if ($balance >= 0) $totalDebit += $balance;
+                else $totalCredit += abs($balance);
             } else {
-                $balance = $sumCredit - $sumDebit;
-                if ($balance >= 0) $creditBalance = $balance;
-                else $debitBalance = abs($balance);
+                if ($balance >= 0) $totalCredit += $balance;
+                else $totalDebit += abs($balance);
             }
+        }
 
-            return ['code' => $account->code, 'name' => $account->name, 'debit' => $debitBalance, 'credit' => $creditBalance];
-        })->filter(fn($row) => $row['debit'] > 0 || $row['credit'] > 0);
-
-        $totalDebit = $reportData->sum('debit');
-        $totalCredit = $reportData->sum('credit');
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.trial_balance', compact('reportData', 'asOfDate', 'totalDebit', 'totalCredit'));
+        $pdf = Pdf::loadView('pdf.trial_balance', compact('reportData', 'asOfDate', 'totalDebit', 'totalCredit'));
         return $pdf->download("Trial-Balance-{$asOfDate}.pdf");
     }
 
+    /**
+     * Profit and Loss PDF
+     */
     public function profitAndLossPdf(Request $request)
     {
         $workspaceId = session('active_workspace_id');
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
 
-        $incomeAccounts = Account::where('category', 'income')->orderBy('code')->get()
-            ->map(function($account) use ($workspaceId, $startDate, $endDate) {
-                $amount = JournalLine::where('account_id', $account->id)
-                    ->whereHas('journalEntry', function($q) use ($workspaceId, $startDate, $endDate) {
-                        $q->where('workspace_id', $workspaceId)->whereBetween('date', [$startDate, $endDate]);
-                    })->selectRaw('SUM(credit - debit) as total')->value('total') ?? 0;
-                return ['name' => $account->name, 'amount' => (float)$amount];
-            })->filter(fn($a) => $a['amount'] != 0);
+        $incomeRoots = Account::where('category', 'income')
+            ->whereNull('parent_id')
+            ->orderBy('code')
+            ->get();
+            
+        $expenseRoots = Account::where('category', 'expense')
+            ->whereNull('parent_id')
+            ->orderBy('code')
+            ->get();
 
-        $expenseAccounts = Account::where('category', 'expense')->orderBy('code')->get()
-            ->map(function($account) use ($workspaceId, $startDate, $endDate) {
-                $amount = JournalLine::where('account_id', $account->id)
-                    ->whereHas('journalEntry', function($q) use ($workspaceId, $startDate, $endDate) {
-                        $q->where('workspace_id', $workspaceId)->whereBetween('date', [$startDate, $endDate]);
-                    })->selectRaw('SUM(debit - credit) as total')->value('total') ?? 0;
-                return ['name' => $account->name, 'amount' => (float)$amount];
-            })->filter(fn($a) => $a['amount'] != 0);
+        $incomeData = [];
+        $totalIncome = 0;
+        foreach ($incomeRoots as $root) {
+            $this->buildHierarchicalPL($root, $workspaceId, $startDate, $endDate, 0, $incomeData);
+            $totalIncome += $root->calculateTotalBalance($workspaceId, $startDate, $endDate);
+        }
 
-        $totalIncome = $incomeAccounts->sum('amount');
-        $totalExpense = $expenseAccounts->sum('amount');
+        $expenseData = [];
+        $totalExpense = 0;
+        foreach ($expenseRoots as $root) {
+            $this->buildHierarchicalPL($root, $workspaceId, $startDate, $endDate, 0, $expenseData);
+            $totalExpense += $root->calculateTotalBalance($workspaceId, $startDate, $endDate);
+        }
+
         $netProfit = $totalIncome - $totalExpense;
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.profit_loss', compact('incomeAccounts', 'expenseAccounts', 'totalIncome', 'totalExpense', 'netProfit', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('pdf.profit_loss', compact(
+            'incomeData', 
+            'expenseData', 
+            'totalIncome', 
+            'totalExpense', 
+            'netProfit',
+            'startDate',
+            'endDate'
+        ));
+
         return $pdf->download("Profit-Loss-{$startDate}-to-{$endDate}.pdf");
     }
 }

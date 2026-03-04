@@ -296,7 +296,7 @@ class FinancialSummaryService
             ->join('journal_entries', 'journal_entries.id', '=', 'journal_lines.journal_entry_id')
             ->where('journal_entries.workspace_id', $this->workspaceId)
             ->where('accounts.category', 'asset')
-            ->where('accounts.code', 'like', '12%') // 1200 Emergency Fund
+            ->where('accounts.code', 'like', '15%') // 1500 DANA DARURAT
             ->selectRaw('SUM(debit - credit) as balance')
             ->value('balance') ?? 0;
 

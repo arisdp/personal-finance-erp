@@ -21,6 +21,7 @@
             <h3 class="card-title">Riwayat Transaksi Terakhir</h3>
         </div>
         <div class="card-body p-0">
+        <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -67,6 +68,7 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
         </div>
         @if($journals->hasPages())
             <div class="card-footer">

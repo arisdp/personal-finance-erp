@@ -33,9 +33,9 @@
         </thead>
         <tbody>
             @foreach($reportData as $row)
-            <tr>
-                <td><code>{{ $row['code'] }}</code></td>
-                <td>{{ $row['name'] }}</td>
+            <tr style="{{ !$row['is_postable'] ? 'font-weight: bold; background-color: #f2f2f2;' : '' }}">
+                <td style="padding-left: {{ 8 + ($row['level'] * 15) }}px;"><code>{{ $row['code'] }}</code></td>
+                <td style="padding-left: {{ 8 + ($row['level'] * 15) }}px;">{{ $row['name'] }}</td>
                 <td class="text-right">{{ $row['debit'] > 0 ? number_format($row['debit'], 0, ',', '.') : '-' }}</td>
                 <td class="text-right">{{ $row['credit'] > 0 ? number_format($row['credit'], 0, ',', '.') : '-' }}</td>
             </tr>

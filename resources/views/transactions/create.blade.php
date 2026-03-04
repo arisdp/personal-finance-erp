@@ -221,6 +221,7 @@
         if (type === 'expense') {
             labelFrom.text('Sumber Dana (Dari mana uangnya?)');
             labelTo.text('Kategori Pengeluaran (Untuk apa?)');
+            debtFields.show();
         } else if (type === 'income') {
             labelFrom.text('Sumber Pemasukan (Dari siapa?)');
             labelTo.text('Tujuan Dana (Masuk ke mana?)');

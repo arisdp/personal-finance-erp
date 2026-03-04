@@ -329,6 +329,12 @@ return [
         ],
 
         [
+            'text' => 'Bank Sync',
+            'route' => 'bank_sync.index',
+            'icon' => 'fas fa-university',
+        ],
+
+        [
             'text' => 'Buku Jurnal',
             'route' => 'journals.index',
             'icon' => 'fas fa-edit',
@@ -378,6 +384,14 @@ return [
             'text' => 'Laba Rugi',
             'route' => 'reports.pl',
             'icon' => 'fas fa-chart-line',
+        ],
+
+        [
+            'text' => 'Analisa & Proyeksi',
+            'route' => 'reports.projections',
+            'icon' => 'fas fa-magic',
+            'label' => 'NEW',
+            'label_color' => 'info',
         ],
 
         [

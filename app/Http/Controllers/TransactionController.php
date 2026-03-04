@@ -107,23 +107,6 @@ class TransactionController extends Controller
                         'description' => $request->description
                     ]);
 
-                    // Update related records
-                    if ($request->filled('installment_id')) {
-                        $inst = Installment::find($request->installment_id);
-                        if ($inst) {
-                            $inst->decrement('remaining_periods');
-                            if ($inst->remaining_periods <= 0) {
-                                $inst->update(['status' => 'completed']);
-                            }
-                        }
-                    }
-
-                    if ($request->filled('recurring_transaction_id')) {
-                        $rt = RecurringTransaction::find($request->recurring_transaction_id);
-                        if ($rt) {
-                            $rt->update(['next_due_date' => Carbon::parse($rt->next_due_date)->addMonth()]);
-                        }
-                    }
                 } else {
                     // Standard Transaction logic
                     $debitAccountId = null;
@@ -162,6 +145,28 @@ class TransactionController extends Controller
                         'credit' => $request->amount,
                         'description' => $request->description
                     ]);
+                }
+
+                // Update related records (Installments / Recurring Bills)
+                if ($request->filled('installment_id')) {
+                    $inst = Installment::find($request->installment_id);
+                    if ($inst) {
+                        $inst->decrement('remaining_periods');
+                        if ($inst->remaining_periods <= 0) {
+                            $inst->update(['status' => 'completed']);
+                        }
+                    }
+                }
+
+                if ($request->filled('recurring_transaction_id')) {
+                    $rt = RecurringTransaction::find($request->recurring_transaction_id);
+                    if ($rt) {
+                        // Update next due date to next month
+                        $rt->update([
+                            'next_due_date' => Carbon::parse($rt->next_due_date)->addMonth(),
+                            'last_posted_date' => $request->date
+                        ]);
+                    }
                 }
             });
 

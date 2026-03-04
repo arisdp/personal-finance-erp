@@ -31,9 +31,11 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($incomeAccounts as $income)
-            <tr>
-                <td width="70%">{{ $income['name'] }}</td>
+            @foreach($incomeData as $income)
+            <tr class="{{ $income['is_parent'] ? 'font-bold' : '' }}">
+                <td width="70%" style="padding-left: {{ 5 + ($income['level'] * 20) }}px;">
+                    {{ $income['name'] }}
+                </td>
                 <td width="30%" class="text-right">{{ number_format($income['amount'], 0, ',', '.') }}</td>
             </tr>
             @endforeach
@@ -51,9 +53,11 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($expenseAccounts as $expense)
-            <tr>
-                <td width="70%">{{ $expense['name'] }}</td>
+            @foreach($expenseData as $expense)
+            <tr class="{{ $expense['is_parent'] ? 'font-bold' : '' }}">
+                <td width="70%" style="padding-left: {{ 5 + ($expense['level'] * 20) }}px;">
+                    {{ $expense['name'] }}
+                </td>
                 <td width="30%" class="text-right">{{ number_format($expense['amount'], 0, ',', '.') }}</td>
             </tr>
             @endforeach
