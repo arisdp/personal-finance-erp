@@ -1,8 +1,10 @@
 @php $level = $level ?? 0; @endphp
-<tr>
+<tr class="{{ $level > 0 ? 'child-row d-none' : 'root-row' }}" data-id="{{ $account->id }}"
+    data-parent="{{ $account->parent_id }}">
     <td style="padding-left: {{ $level * 30 + 10 }}px;">
-        @if($account->children->count() > 0)
-            <i class="fas fa-caret-down text-muted mr-1"></i>
+        @if ($account->children->count() > 0)
+            <i class="fas fa-caret-right text-muted mr-1 toggle-children" style="cursor: pointer;"
+                data-target="{{ $account->id }}"></i>
         @else
             <i class="fas fa-minus text-muted mr-2 small"></i>
         @endif
@@ -12,7 +14,7 @@
         <span class="{{ $level == 0 ? 'font-weight-bold' : '' }}">
             {{ $account->name }}
         </span>
-        @if(!$account->is_postable)
+        @if (!$account->is_postable)
             <span class="badge badge-light ml-1 border">Parent</span>
         @endif
     </td>
@@ -27,13 +29,14 @@
         <a href="{{ route('accounts.edit', $account) }}" class="btn btn-sm btn-info"><i class="fas fa-edit"></i></a>
         <form action="{{ route('accounts.destroy', $account) }}" method="POST" class="d-inline">
             @csrf @method('DELETE')
-            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Hapus akun ini?')"><i class="fas fa-trash"></i></button>
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Hapus akun ini?')"><i
+                    class="fas fa-trash"></i></button>
         </form>
     </td>
 </tr>
 
-@if($account->children->count() > 0)
-    @foreach($account->children->sortBy('code') as $child)
+@if ($account->children->count() > 0)
+    @foreach ($account->children->sortBy('code') as $child)
         @include('accounts.partials.account_row', ['account' => $child, 'level' => $level + 1])
     @endforeach
 @endif

@@ -29,43 +29,56 @@
                 <a href="{{ route('reports.trial.pdf', ['date' => $asOfDate]) }}" class="btn btn-danger btn-sm mr-2">
                     <i class="fas fa-file-pdf mr-1"></i> Download PDF
                 </a>
-                <button type="button" class="btn btn-tool" onclick="window.print()"><i class="fas fa-print"></i> Cetak</button>
+                <button type="button" class="btn btn-tool" onclick="window.print()"><i class="fas fa-print"></i>
+                    Cetak</button>
             </div>
         </div>
         <div class="card-body p-0">
-            <table class="table table-striped table-hover table-bordered">
+            <table class="table table-hover table-bordered mb-0">
                 <thead class="bg-light">
                     <tr>
                         <th width="15%">Kode Akun</th>
-                        <th width="45%">Nama Akun</th>
-                        <th width="20%" class="text-right">Debit</th>
-                        <th width="20%" class="text-right">Kredit</th>
+                        <th>Nama Akun</th>
+                        <th width="18%" class="text-right">Debit</th>
+                        <th width="18%" class="text-right">Kredit</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($reportData as $row)
-                    <tr class="{{ !$row['is_postable'] ? 'font-weight-bold bg-light' : '' }}">
-                        <td>
-                            <span style="margin-left: {{ $row['level'] * 20 }}px;">
-                                <code>{{ $row['code'] }}</code>
-                            </span>
-                        </td>
-                        <td>
-                            <span style="margin-left: {{ $row['level'] * 20 }}px;">
-                                {{ $row['name'] }}
-                            </span>
-                        </td>
-                        <td class="text-right">
-                            {{ $row['debit'] > 0 ? 'Rp ' . number_format($row['debit'], 0, ',', '.') : '-' }}
-                        </td>
-                        <td class="text-right">
-                            {{ $row['credit'] > 0 ? 'Rp ' . number_format($row['credit'], 0, ',', '.') : '-' }}
-                        </td>
-                    </tr>
+                        <tr data-id="{{ $row['id'] }}"
+                            @if ($row['parent_id']) data-parent="{{ $row['parent_id'] }}" @endif
+                            class="
+                            {{ !$row['is_postable'] ? 'font-weight-bold' : '' }}
+                            {{ $row['level'] === 0 ? 'bg-light' : '' }}
+                            {{ $row['level'] > 0 ? 'd-none child-row' : '' }}
+                        ">
+                            <td>
+                                <span style="padding-left: {{ $row['level'] * 20 }}px;">
+                                    @if ($row['has_children'])
+                                        <i class="fas fa-caret-right toggle-children text-secondary mr-1"
+                                            data-target="{{ $row['id'] }}" style="cursor:pointer; width:14px;"></i>
+                                    @else
+                                        <span style="display:inline-block; width:20px;"></span>
+                                    @endif
+                                    <code>{{ $row['code'] }}</code>
+                                </span>
+                            </td>
+                            <td>
+                                <span style="padding-left: {{ $row['level'] * 20 }}px;">
+                                    {{ $row['name'] }}
+                                </span>
+                            </td>
+                            <td class="text-right">
+                                {{ $row['debit'] > 0 ? 'Rp ' . number_format($row['debit'], 0, ',', '.') : '-' }}
+                            </td>
+                            <td class="text-right">
+                                {{ $row['credit'] > 0 ? 'Rp ' . number_format($row['credit'], 0, ',', '.') : '-' }}
+                            </td>
+                        </tr>
                     @empty
-                    <tr>
-                        <td colspan="4" class="text-center py-4">Tidak ada data transaksi hingga tanggal ini.</td>
-                    </tr>
+                        <tr>
+                            <td colspan="4" class="text-center py-4">Tidak ada data transaksi hingga tanggal ini.</td>
+                        </tr>
                     @endforelse
                 </tbody>
                 <tfoot class="bg-light font-weight-bold" style="font-size: 1.1rem;">
@@ -77,10 +90,60 @@
                 </tfoot>
             </table>
         </div>
-        @if(abs($totalDebit - $totalCredit) > 0.01)
-        <div class="card-footer bg-danger text-white text-center">
-            <i class="fas fa-exclamation-triangle"></i> PERINGATAN: Neraca tidak seimbang! Selisih: Rp {{ number_format(abs($totalDebit - $totalCredit), 0, ',', '.') }}
-        </div>
+        @if (abs($totalDebit - $totalCredit) > 0.01)
+            <div class="card-footer bg-danger text-white text-center">
+                <i class="fas fa-exclamation-triangle"></i> PERINGATAN: Neraca tidak seimbang! Selisih: Rp
+                {{ number_format(abs($totalDebit - $totalCredit), 0, ',', '.') }}
+            </div>
         @endif
     </div>
+@stop
+
+@section('css')
+    <style>
+        .child-row {
+            transition: all 0.2s ease;
+        }
+
+        table td {
+            vertical-align: middle !important;
+        }
+
+        code {
+            font-size: 0.95rem;
+            color: #e83e8c;
+        }
+    </style>
+@stop
+
+@section('js')
+    <script>
+        $(document).ready(function() {
+            $('.toggle-children').on('click', function() {
+                const icon = $(this);
+                const targetId = icon.data('target');
+
+                if (icon.hasClass('fa-caret-right')) {
+                    icon.removeClass('fa-caret-right').addClass('fa-caret-down');
+                    $('tr[data-parent="' + targetId + '"]').removeClass('d-none');
+                } else {
+                    icon.removeClass('fa-caret-down').addClass('fa-caret-right');
+                    hideDescendants(targetId);
+                }
+            });
+
+            function hideDescendants(parentId) {
+                let children = $('tr[data-parent="' + parentId + '"]');
+                children.addClass('d-none');
+                children.each(function() {
+                    let childIcon = $(this).find('.toggle-children');
+                    if (childIcon.length > 0) {
+                        childIcon.removeClass('fa-caret-down').addClass('fa-caret-right');
+                    }
+                    let childId = $(this).data('id');
+                    if (childId) hideDescendants(childId);
+                });
+            }
+        });
+    </script>
 @stop

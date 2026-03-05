@@ -44,7 +44,7 @@ class ReportController extends Controller
         return view('reports.trial_balance', compact('reportData', 'asOfDate', 'totalDebit', 'totalCredit'));
     }
 
-    private function buildHierarchicalTrialBalance($accounts, $workspaceId, $asOfDate, $level = 0)
+    private function buildHierarchicalTrialBalance($accounts, $workspaceId, $asOfDate, $level = 0, $parentId = null)
     {
         $data = [];
 
@@ -67,18 +67,29 @@ class ReportController extends Controller
                 else $debitBalance = abs($totalBalance);
             }
 
+            $hasChildren = $account->children->isNotEmpty();
+
             $data[] = [
-                'code' => $account->code,
-                'name' => $account->name,
-                'category' => $account->category,
-                'debit' => $debitBalance,
-                'credit' => $creditBalance,
-                'level' => $level,
-                'is_postable' => $account->is_postable
+                'id'          => $account->id,
+                'parent_id'   => $parentId,
+                'has_children'=> $hasChildren,
+                'code'        => $account->code,
+                'name'        => $account->name,
+                'category'    => $account->category,
+                'debit'       => $debitBalance,
+                'credit'      => $creditBalance,
+                'level'       => $level,
+                'is_postable' => $account->is_postable,
             ];
 
-            if ($account->children->isNotEmpty()) {
-                $childrenData = $this->buildHierarchicalTrialBalance($account->children()->orderBy('code')->get(), $workspaceId, $asOfDate, $level + 1);
+            if ($hasChildren) {
+                $childrenData = $this->buildHierarchicalTrialBalance(
+                    $account->children()->orderBy('code')->get(),
+                    $workspaceId,
+                    $asOfDate,
+                    $level + 1,
+                    $account->id
+                );
                 $data = array_merge($data, $childrenData);
             }
         }
