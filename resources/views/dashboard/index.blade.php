@@ -5,8 +5,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between">
         <h1>Dashboard Keluarga</h1>
-        
-        @if(session('active_workspace_id'))
+
+        @if (session('active_workspace_id'))
             @php $activeWorkspace = \App\Models\Workspace::find(session('active_workspace_id'))->name; @endphp
             <div>
                 <span class="badge badge-info py-2 px-3 text-md">
@@ -83,6 +83,87 @@
 
     </div>
 
+    <!-- Barisan 1.5: Investment Portfolio Summary (New) -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-outline card-info">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-pie mr-1"></i> Ringkasan Portofolio Investasi</h3>
+                    <div class="card-tools">
+                        <a href="{{ route('investments.index') }}" class="btn btn-tool btn-sm">
+                            <i class="fas fa-arrow-right"></i> Lihat Portofolio
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 border-right">
+                            <div class="description-block">
+                                <span
+                                    class="description-percentage {{ $investmentSummary['total_gain_loss'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                    <i
+                                        class="fas {{ $investmentSummary['total_gain_loss'] >= 0 ? 'fa-caret-up' : 'fa-caret-down' }}"></i>
+                                    {{ $investmentSummary['gain_loss_pct'] }}%
+                                </span>
+                                <h5 class="description-header">Rp
+                                    {{ number_format($investmentSummary['total_market_value'], 0, ',', '.') }}</h5>
+                                <span class="description-text">TOTAL NILAI PASAR</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 border-right">
+                            <div class="description-block">
+                                <span class="description-percentage text-muted">
+                                    {{ $investmentSummary['count'] }} Unit Aset
+                                </span>
+                                <h5 class="description-header">Rp
+                                    {{ number_format($investmentSummary['total_cost'], 0, ',', '.') }}</h5>
+                                <span class="description-text">TOTAL MODAL (COST)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 border-right">
+                            <div class="description-block">
+                                <span
+                                    class="description-percentage {{ $investmentSummary['total_gain_loss'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                    Rp {{ number_format($investmentSummary['total_gain_loss'], 0, ',', '.') }}
+                                </span>
+                                <h5
+                                    class="description-header {{ $investmentSummary['total_gain_loss'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                    {{ $investmentSummary['total_gain_loss'] >= 0 ? 'UNREALIZED PROFIT' : 'UNREALIZED LOSS' }}
+                                </h5>
+                                <span class="description-text">PERFORMA SAAT INI</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-2">
+                                <p class="text-xs font-weight-bold text-uppercase text-muted mb-2">5 Aset Terbesar</p>
+                                @forelse($topHoldings as $holding)
+                                    <div class="progress-group mb-2">
+                                        <span class="text-xs">{{ $holding->asset_name }}</span>
+                                        <span class="float-right text-xs"><b>Rp
+                                                {{ number_format($holding->market_value, 0, ',', '.') }}</b></span>
+                                        <div class="progress progress-xxs">
+                                            @php
+                                                $pct =
+                                                    $investmentSummary['total_market_value'] > 0
+                                                        ? ($holding->market_value /
+                                                                $investmentSummary['total_market_value']) *
+                                                            100
+                                                        : 0;
+                                            @endphp
+                                            <div class="progress-bar bg-info" style="width: {{ $pct }}%"></div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <p class="text-muted text-xs italic">Belum ada aset investasi</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Barisan ke-2: Cashflow & Dana Darurat -->
     <div class="row">
 
@@ -98,7 +179,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center border-bottom mb-3 pb-3">
                         <p class="text-success text-xl mb-0">
-                            <i class="fas fa-arrow-up mr-2"></i> Rp {{ number_format($cashflowThisMonth['income'], 0, ',', '.') }}
+                            <i class="fas fa-arrow-up mr-2"></i> Rp
+                            {{ number_format($cashflowThisMonth['income'], 0, ',', '.') }}
                         </p>
                         <p class="d-flex flex-column text-right">
                             <span class="text-muted">Pemasukan</span>
@@ -107,7 +189,8 @@
 
                     <div class="d-flex justify-content-between align-items-center border-bottom mb-3 pb-3">
                         <p class="text-danger text-xl mb-0">
-                            <i class="fas fa-arrow-down mr-2"></i> Rp {{ number_format($cashflowThisMonth['expense'], 0, ',', '.') }}
+                            <i class="fas fa-arrow-down mr-2"></i> Rp
+                            {{ number_format($cashflowThisMonth['expense'], 0, ',', '.') }}
                         </p>
                         <p class="d-flex flex-column text-right">
                             <span class="text-muted">Pengeluaran</span>
@@ -115,8 +198,10 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center">
-                        <p class="{{ $cashflowThisMonth['net'] >= 0 ? 'text-success' : 'text-danger' }} font-weight-bold text-xl mb-0">
-                            <i class="fas fa-equals mr-2"></i> Rp {{ number_format($cashflowThisMonth['net'], 0, ',', '.') }}
+                        <p
+                            class="{{ $cashflowThisMonth['net'] >= 0 ? 'text-success' : 'text-danger' }} font-weight-bold text-xl mb-0">
+                            <i class="fas fa-equals mr-2"></i> Rp
+                            {{ number_format($cashflowThisMonth['net'], 0, ',', '.') }}
                         </p>
                         <p class="d-flex flex-column text-right">
                             <span class="text-muted">Nett Cashflow</span>
@@ -137,11 +222,16 @@
                         <div class="col-12 text-center">
                             @php
                                 $colorClass = 'text-danger';
-                                if($emergencyFund['status'] === 'warning') $colorClass = 'text-warning';
-                                if($emergencyFund['status'] === 'healthy') $colorClass = 'text-success';
+                                if ($emergencyFund['status'] === 'warning') {
+                                    $colorClass = 'text-warning';
+                                }
+                                if ($emergencyFund['status'] === 'healthy') {
+                                    $colorClass = 'text-success';
+                                }
                             @endphp
-                            
-                            <h2 class="{{ $colorClass }} font-weight-bold display-4">{{ $emergencyFund['current_months'] }} <small class="text-muted text-lg">Bulan</small></h2>
+
+                            <h2 class="{{ $colorClass }} font-weight-bold display-4">
+                                {{ $emergencyFund['current_months'] }} <small class="text-muted text-lg">Bulan</small></h2>
                             <p class="text-muted">Target Anda: {{ $emergencyFund['target_months'] }} Bulan Pengeluaran</p>
                         </div>
                     </div>
@@ -153,23 +243,30 @@
                     <div class="progress progress-sm mb-4">
                         @php
                             $bgClass = 'bg-danger';
-                            if($emergencyFund['status'] === 'warning') $bgClass = 'bg-warning';
-                            if($emergencyFund['status'] === 'healthy') $bgClass = 'bg-success';
+                            if ($emergencyFund['status'] === 'warning') {
+                                $bgClass = 'bg-warning';
+                            }
+                            if ($emergencyFund['status'] === 'healthy') {
+                                $bgClass = 'bg-success';
+                            }
                         @endphp
-                        <div class="progress-bar {{ $bgClass }}" style="width: {{ $emergencyFund['progress_percent'] }}%"></div>
+                        <div class="progress-bar {{ $bgClass }}"
+                            style="width: {{ $emergencyFund['progress_percent'] }}%"></div>
                     </div>
 
                     <div class="row text-center">
                         <div class="col-6 border-right">
                             <span class="text-muted d-block">Terkumpul</span>
-                            <span class="font-weight-bold">Rp {{ number_format($emergencyFund['total_fund'], 0, ',', '.') }}</span>
+                            <span class="font-weight-bold">Rp
+                                {{ number_format($emergencyFund['total_fund'], 0, ',', '.') }}</span>
                         </div>
                         <div class="col-6">
                             <span class="text-muted d-block">Target Nominal</span>
-                            <span class="font-weight-bold">Rp {{ number_format($emergencyFund['target_amount'], 0, ',', '.') }}</span>
+                            <span class="font-weight-bold">Rp
+                                {{ number_format($emergencyFund['target_amount'], 0, ',', '.') }}</span>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
@@ -196,20 +293,24 @@
                             </thead>
                             <tbody>
                                 @forelse($creditCards as $cc)
-                                <tr>
-                                    <td class="pl-3">{{ $cc['name'] }}</td>
-                                    <td class="text-right font-weight-bold text-danger">Rp {{ number_format($cc['used'], 0, ',', '.') }}</td>
-                                    <td class="text-right text-muted">Rp {{ number_format($cc['limit'], 0, ',', '.') }}</td>
-                                    <td>
-                                        <div class="progress progress-xs mt-2" title="{{ $cc['usage_percent'] }}%">
-                                            <div class="progress-bar bg-danger" style="width: {{ $cc['usage_percent'] }}%"></div>
-                                        </div>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td class="pl-3">{{ $cc['name'] }}</td>
+                                        <td class="text-right font-weight-bold text-danger">Rp
+                                            {{ number_format($cc['used'], 0, ',', '.') }}</td>
+                                        <td class="text-right text-muted">Rp
+                                            {{ number_format($cc['limit'], 0, ',', '.') }}</td>
+                                        <td>
+                                            <div class="progress progress-xs mt-2" title="{{ $cc['usage_percent'] }}%">
+                                                <div class="progress-bar bg-danger"
+                                                    style="width: {{ $cc['usage_percent'] }}%"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 @empty
-                                <tr>
-                                    <td colspan="4" class="text-center py-3 text-muted italic small">Data kartu kredit tidak ditemukan</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3 text-muted italic small">Data kartu
+                                            kredit tidak ditemukan</td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -221,21 +322,25 @@
         <div class="col-md-5">
             <div class="card card-outline card-purple">
                 <div class="card-header">
-                    <h3 class="card-title text-purple"><i class="fas fa-file-contract mr-1"></i> Ringkasan Cicilan (Hutang)</h3>
+                    <h3 class="card-title text-purple"><i class="fas fa-file-contract mr-1"></i> Ringkasan Cicilan
+                        (Hutang)</h3>
                     <div class="card-tools">
-                        <a href="{{ route('installments.index') }}" class="btn btn-tool btn-sm"><i class="fas fa-arrow-right"></i></a>
+                        <a href="{{ route('installments.index') }}" class="btn btn-tool btn-sm"><i
+                                class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="p-3 text-center border-bottom bg-light">
                         <small class="text-uppercase text-muted d-block mb-1">Total Cicilan Bulanan</small>
-                        <h3 class="font-weight-bold mb-0 text-purple">Rp {{ number_format($installmentSummary['total_monthly'], 0, ',', '.') }}</h3>
+                        <h3 class="font-weight-bold mb-0 text-purple">Rp
+                            {{ number_format($installmentSummary['total_monthly'], 0, ',', '.') }}</h3>
                         <small class="text-muted">{{ $installmentSummary['count'] }} Cicilan Aktif</small>
                     </div>
                     <div class="p-3">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Total Sisa Hutang:</span>
-                            <span class="font-weight-bold text-danger">Rp {{ number_format($installmentSummary['total_remaining'], 0, ',', '.') }}</span>
+                            <span class="font-weight-bold text-danger">Rp
+                                {{ number_format($installmentSummary['total_remaining'], 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -243,68 +348,75 @@
         </div>
     </div>
     <!-- Barisan ke-4: Active Bills Status (User Request) -->
-    @if(count($upcomingBills) > 0)
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card card-outline card-warning">
-                <div class="card-header">
-                    <h3 class="card-title text-warning"><i class="fas fa-bell mr-1"></i> Status Tagihan Bulan Ini</h3>
-                    <div class="card-tools">
-                        <a href="{{ route('recurring.index') }}" class="btn btn-tool btn-sm"><i class="fas fa-arrow-right"></i></a>
+    @if (count($upcomingBills) > 0)
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card card-outline card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title text-warning"><i class="fas fa-bell mr-1"></i> Status Tagihan Bulan Ini</h3>
+                        <div class="card-tools">
+                            <a href="{{ route('recurring.index') }}" class="btn btn-tool btn-sm"><i
+                                    class="fas fa-arrow-right"></i></a>
+                        </div>
                     </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Nama Tagihan</th>
-                                    <th>Jatuh Tempo</th>
-                                    <th class="text-right">Nominal</th>
-                                    <th class="text-center">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($upcomingBills as $bill)
-                                <tr>
-                                    <td class="pl-3">{{ $bill['name'] }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($bill['next_due_date'])->format('d M Y') }}</td>
-                                    <td class="text-right font-weight-bold">Rp {{ number_format($bill['amount'], 0, ',', '.') }}</td>
-                                    <td class="text-center">
-                                        @php 
-                                            $diff = now()->diffInDays($bill['next_due_date'], false);
-                                            $isPaidThisMonth = false;
-                                            if (isset($bill['last_posted_date']) && $bill['last_posted_date']) {
-                                                $lastPaid = \Carbon\Carbon::parse($bill['last_posted_date']);
-                                                if ($bill['frequency'] === 'monthly') {
-                                                    $isPaidThisMonth = $lastPaid->month == now()->month && $lastPaid->year == now()->year;
-                                                } elseif ($bill['frequency'] === 'weekly') {
-                                                    $isPaidThisMonth = $lastPaid->diffInWeeks(now()) === 0;
-                                                }
-                                            }
-                                        @endphp
-                                        
-                                        @if($isPaidThisMonth)
-                                            <span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Lunas</span>
-                                        @else
-                                            @if($diff < 0)
-                                                <span class="badge badge-danger">Terlambat {{ abs($diff) }} Hari</span>
-                                            @elseif($diff == 0)
-                                                <span class="badge badge-warning">Hari Ini!</span>
-                                            @else
-                                                <span class="badge badge-info">{{ $diff }} Hari Lagi</span>
-                                            @endif
-                                        @endif
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Tagihan</th>
+                                        <th>Jatuh Tempo</th>
+                                        <th class="text-right">Nominal</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($upcomingBills as $bill)
+                                        <tr>
+                                            <td class="pl-3">{{ $bill['name'] }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($bill['next_due_date'])->format('d M Y') }}</td>
+                                            <td class="text-right font-weight-bold">Rp
+                                                {{ number_format($bill['amount'], 0, ',', '.') }}</td>
+                                            <td class="text-center">
+                                                @php
+                                                    $diff = now()->diffInDays($bill['next_due_date'], false);
+                                                    $isPaidThisMonth = false;
+                                                    if (isset($bill['last_posted_date']) && $bill['last_posted_date']) {
+                                                        $lastPaid = \Carbon\Carbon::parse($bill['last_posted_date']);
+                                                        if ($bill['frequency'] === 'monthly') {
+                                                            $isPaidThisMonth =
+                                                                $lastPaid->month == now()->month &&
+                                                                $lastPaid->year == now()->year;
+                                                        } elseif ($bill['frequency'] === 'weekly') {
+                                                            $isPaidThisMonth = $lastPaid->diffInWeeks(now()) === 0;
+                                                        }
+                                                    }
+                                                @endphp
+
+                                                @if ($isPaidThisMonth)
+                                                    <span class="badge badge-success"><i
+                                                            class="fas fa-check-circle mr-1"></i> Lunas</span>
+                                                @else
+                                                    @if ($diff < 0)
+                                                        <span class="badge badge-danger">Terlambat {{ abs($diff) }}
+                                                            Hari</span>
+                                                    @elseif($diff == 0)
+                                                        <span class="badge badge-warning">Hari Ini!</span>
+                                                    @else
+                                                        <span class="badge badge-info">{{ $diff }} Hari
+                                                            Lagi</span>
+                                                    @endif
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 
     <!-- Barisan ke-5: Budget Monitoring (User Request) -->
@@ -333,36 +445,48 @@
                             </thead>
                             <tbody>
                                 @forelse($budgetSummary as $item)
-                                <tr>
-                                    <td>{{ $item['name'] }}</td>
-                                    <td class="text-right text-muted">Rp {{ number_format($item['budget'], 0, ',', '.') }}</td>
-                                    <td class="text-right font-weight-bold">Rp {{ number_format($item['actual'], 0, ',', '.') }}</td>
-                                    <td class="text-right {{ $item['remaining'] < 0 ? 'text-danger font-weight-bold' : 'text-success' }}">
-                                        {{ $item['remaining'] < 0 ? '-' : '' }}Rp {{ number_format(abs($item['remaining']), 0, ',', '.') }}
-                                        @if($item['remaining'] < 0)
-                                            <i class="fas fa-exclamation-circle ml-1" title="Melebihi Budget!"></i>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="progress progress-sm mt-2" title="{{ $item['percent'] }}% Terpakai">
-                                            @php 
-                                                $barClass = 'bg-info'; 
-                                                if($item['percent'] > 80) $barClass = 'bg-warning';
-                                                if($item['percent'] > 100) $barClass = 'bg-danger';
-                                            @endphp
-                                            <div class="progress-bar {{ $barClass }}" style="width: {{ min(100, $item['percent']) }}%"></div>
-                                        </div>
-                                        <small class="{{ $item['percent'] > 100 ? 'text-danger font-weight-bold' : 'text-muted' }}">
-                                            {{ $item['percent'] }}% dari budget
-                                        </small>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td>{{ $item['name'] }}</td>
+                                        <td class="text-right text-muted">Rp
+                                            {{ number_format($item['budget'], 0, ',', '.') }}</td>
+                                        <td class="text-right font-weight-bold">Rp
+                                            {{ number_format($item['actual'], 0, ',', '.') }}</td>
+                                        <td
+                                            class="text-right {{ $item['remaining'] < 0 ? 'text-danger font-weight-bold' : 'text-success' }}">
+                                            {{ $item['remaining'] < 0 ? '-' : '' }}Rp
+                                            {{ number_format(abs($item['remaining']), 0, ',', '.') }}
+                                            @if ($item['remaining'] < 0)
+                                                <i class="fas fa-exclamation-circle ml-1" title="Melebihi Budget!"></i>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="progress progress-sm mt-2"
+                                                title="{{ $item['percent'] }}% Terpakai">
+                                                @php
+                                                    $barClass = 'bg-info';
+                                                    if ($item['percent'] > 80) {
+                                                        $barClass = 'bg-warning';
+                                                    }
+                                                    if ($item['percent'] > 100) {
+                                                        $barClass = 'bg-danger';
+                                                    }
+                                                @endphp
+                                                <div class="progress-bar {{ $barClass }}"
+                                                    style="width: {{ min(100, $item['percent']) }}%"></div>
+                                            </div>
+                                            <small
+                                                class="{{ $item['percent'] > 100 ? 'text-danger font-weight-bold' : 'text-muted' }}">
+                                                {{ $item['percent'] }}% dari budget
+                                            </small>
+                                        </td>
+                                    </tr>
                                 @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">
-                                        <i class="fas fa-info-circle mr-1"></i> Belum ada budget yang diatur untuk bulan ini.
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">
+                                            <i class="fas fa-info-circle mr-1"></i> Belum ada budget yang diatur untuk
+                                            bulan ini.
+                                        </td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>

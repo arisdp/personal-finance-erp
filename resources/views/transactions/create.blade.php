@@ -109,23 +109,46 @@
                             <h6 class="font-weight-bold mb-3 text-primary"><i class="fas fa-chart-line mr-1"></i> Detail
                                 Investasi</h6>
                             <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3 p-2 bg-white border rounded">
+                                        <label class="text-xs text-muted">Pilih dari Master Instrumen (Opsional)</label>
+                                        <select id="instrument_selector" class="form-control select2">
+                                            <option value="">-- Pilih Instrumen / Emiten --</option>
+                                            @foreach ($instruments as $instrument)
+                                                <option value="{{ $instrument->id }}"
+                                                    data-ticker="{{ $instrument->ticker }}"
+                                                    data-name="{{ $instrument->name }}"
+                                                    data-type="{{ $instrument->asset_type }}"
+                                                    data-price="{{ (float) $instrument->current_price }}">
+                                                    [{{ $instrument->ticker }}] {{ $instrument->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Nama Aset / Ticker</label>
-                                        <input type="text" name="asset_name" class="form-control"
-                                            placeholder="E.g. BBCA, Emas Antam">
-                                        <small class="text-muted">Nama aset atau kode saham.</small>
+                                        <label>Nama Aset</label>
+                                        <input type="text" name="asset_name" id="asset_name" class="form-control"
+                                            placeholder="E.g. Bank Central Asia">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Ticker / Kode</label>
+                                        <input type="text" name="ticker" id="ticker"
+                                            class="form-control text-uppercase" placeholder="BBCA">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Tipe Aset</label>
-                                        <select name="asset_type" class="form-control">
-                                            <option value="gold">Emas</option>
-                                            <option value="stock">Saham</option>
-                                            <option value="crypto">Crypto</option>
-                                            <option value="mutual_fund">Reksadana</option>
-                                            <option value="other">Lainnya</option>
+                                        <select name="asset_type" id="asset_type" class="form-control">
+                                            <option value="gold">🥇 Emas</option>
+                                            <option value="stock">📈 Saham</option>
+                                            <option value="crypto">💎 Crypto</option>
+                                            <option value="mutual_fund">📦 Reksadana</option>
+                                            <option value="other">📋 Lainnya</option>
                                         </select>
                                     </div>
                                 </div>
@@ -241,6 +264,19 @@
 
             // Toggle fields on load
             toggleFormFields();
+
+            // Instrument Selector Populator
+            $('#instrument_selector').on('change', function() {
+                const selected = $(this).find(':selected');
+                if (selected.val()) {
+                    $('#asset_name').val(selected.data('name'));
+                    $('#asset_type').val(selected.data('type'));
+                    $('#ticker').val(selected.data('ticker'));
+
+                    const price = selected.data('price');
+                    // Optional: You might want to update some UI or amount if helpful
+                }
+            });
         });
 
         function filterAccountOptions(selectId, categories) {

@@ -72,6 +72,12 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('investments/{investment}/price', [\App\Http\Controllers\AssetController::class, 'updatePrice'])->name('investments.updatePrice');
     Route::delete('investments/{investment}', [\App\Http\Controllers\AssetController::class, 'destroy'])->name('investments.destroy');
 
+    // Investment Instruments (Emiten/Master Price)
+    Route::get('investment-instruments', [\App\Http\Controllers\InvestmentInstrumentController::class, 'index'])->name('investment_instruments.index');
+    Route::post('investment-instruments', [\App\Http\Controllers\InvestmentInstrumentController::class, 'store'])->name('investment_instruments.store');
+    Route::patch('investment-instruments/{investmentInstrument}/price', [\App\Http\Controllers\InvestmentInstrumentController::class, 'updatePrice'])->name('investment_instruments.updatePrice');
+    Route::delete('investment-instruments/{investmentInstrument}', [\App\Http\Controllers\InvestmentInstrumentController::class, 'destroy'])->name('investment_instruments.destroy');
+
     // Workspace Routes
     Route::resource('workspaces', \App\Http\Controllers\WorkspaceController::class);
     Route::post('workspaces/{workspace}/switch', [\App\Http\Controllers\WorkspaceController::class, 'switch'])->name('workspaces.switch');

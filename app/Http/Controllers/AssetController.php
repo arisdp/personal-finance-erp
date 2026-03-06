@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AssetHolding;
 use App\Models\AssetPrice;
 use App\Models\Account;
+use App\Models\InvestmentInstrument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -46,7 +47,9 @@ class AssetController extends Controller
             ->orderBy('code')
             ->get();
 
-        return view('investments.create', compact('accounts'));
+        $instruments = InvestmentInstrument::orderBy('ticker')->get();
+
+        return view('investments.create', compact('accounts', 'instruments'));
     }
 
     /**
@@ -66,16 +69,28 @@ class AssetController extends Controller
 
         $workspaceId = session('active_workspace_id');
 
+        // Link to master instrument if exists
+        $instrumentId = null;
+        if ($request->ticker) {
+            $instrument = InvestmentInstrument::where('ticker', strtoupper($request->ticker))->first();
+            if ($instrument) {
+                $instrumentId = $instrument->id;
+                // If linked, we might want to ensure the asset_name and asset_type match for consistency
+                // but for now we'll just link it.
+            }
+        }
+
         AssetHolding::create([
-            'workspace_id' => $workspaceId,
-            'account_id' => $request->account_id,
-            'asset_name' => $request->asset_name,
-            'asset_type' => $request->asset_type,
-            'ticker' => $request->ticker,
-            'quantity' => $request->quantity,
+            'workspace_id'  => $workspaceId,
+            'instrument_id' => $instrumentId,
+            'account_id'    => $request->account_id,
+            'asset_name'    => $request->asset_name,
+            'asset_type'    => $request->asset_type,
+            'ticker'        => strtoupper($request->ticker),
+            'quantity'      => $request->quantity,
             'avg_buy_price' => $request->avg_buy_price,
             'current_price' => $request->current_price,
-            'last_updated' => Carbon::now(),
+            'last_updated'  => Carbon::now(),
         ]);
 
         // Log initial price if provided

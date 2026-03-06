@@ -257,7 +257,7 @@ return [
     */
 
     'use_route_url' => false,
-    'dashboard_url' => 'home',
+    'dashboard_url' => 'dashboard',
     'logout_url' => 'logout',
     'login_url' => 'login',
     'register_url' => 'register',
@@ -306,104 +306,125 @@ return [
             'icon' => 'fas fa-chart-line',
         ],
 
+        // --- MASTER DATA ---
         [
-            'header' => 'MASTER DATA',
+            'text' => 'Master Data',
+            'icon' => 'fas fa-database',
+            'submenu' => [
+                [
+                    'text' => 'Chart of Accounts',
+                    'route' => 'accounts.index',
+                    'icon' => 'fas fa-book',
+                ],
+                [
+                    'text' => 'Master Instrumen',
+                    'route' => 'investment_instruments.index',
+                    'icon' => 'fas fa-chart-bar',
+                ],
+            ],
         ],
 
+        // --- TRANSAKSI ---
         [
-            'text' => 'Chart of Accounts',
-            'route' => 'accounts.index',
-            'icon' => 'fas fa-book',
+            'text' => 'Transaksi',
+            'icon' => 'fas fa-exchange-alt',
+            'submenu' => [
+                [
+                    'text' => 'Smart Transaction',
+                    'route' => 'transactions.create',
+                    'icon' => 'fas fa-magic',
+                    'label' => 'HOT',
+                    'label_color' => 'success',
+                ],
+                [
+                    'text' => 'Buku Jurnal',
+                    'route' => 'journals.index',
+                    'icon' => 'fas fa-edit',
+                ],
+                [
+                    'text' => 'Bank Sync',
+                    'route' => 'bank_sync.index',
+                    'icon' => 'fas fa-university',
+                ],
+                [
+                    'text' => 'Investasi & Portfolio',
+                    'route' => 'investments.index',
+                    'icon' => 'fas fa-chart-pie',
+                ],
+            ],
         ],
 
+        // --- PERENCANAAN ---
         [
-            'header' => 'TRANSACTIONS',
+            'text' => 'Perencanaan',
+            'icon' => 'fas fa-tasks',
+            'submenu' => [
+                [
+                    'text' => 'Anggaran',
+                    'route' => 'budgets.index',
+                    'icon' => 'fas fa-bullseye',
+                ],
+                [
+                    'text' => 'Tagihan Rutin',
+                    'route' => 'recurring.index',
+                    'icon' => 'fas fa-calendar-alt',
+                ],
+                [
+                    'text' => 'Cicilan & Hutang',
+                    'route' => 'installments.index',
+                    'icon' => 'fas fa-credit-card',
+                ],
+            ],
         ],
 
+        // --- LAPORAN ---
         [
-            'text' => 'Smart Transaction',
-            'route' => 'transactions.create',
-            'icon' => 'fas fa-magic',
-            'label' => 'HOT',
-            'label_color' => 'success',
+            'text' => 'Laporan',
+            'icon' => 'fas fa-file-invoice-dollar',
+            'submenu' => [
+                [
+                    'text' => 'Buku Besar',
+                    'route' => 'ledger.index',
+                    'icon' => 'fas fa-book-open',
+                ],
+                [
+                    'text' => 'Neraca Saldo',
+                    'route' => 'reports.trial',
+                    'icon' => 'fas fa-balance-scale',
+                ],
+                [
+                    'text' => 'Laba Rugi',
+                    'route' => 'reports.pl',
+                    'icon' => 'fas fa-chart-line',
+                ],
+                [
+                    'text' => 'Analisa & Proyeksi',
+                    'route' => 'reports.projections',
+                    'icon' => 'fas fa-magic',
+                    'label' => 'NEW',
+                    'label_color' => 'info',
+                ],
+            ],
         ],
 
+        // --- SISTEM ---
         [
-            'text' => 'Bank Sync',
-            'route' => 'bank_sync.index',
-            'icon' => 'fas fa-university',
-        ],
-
-        [
-            'text' => 'Buku Jurnal',
-            'route' => 'journals.index',
-            'icon' => 'fas fa-edit',
-        ],
-
-        [
-            'text' => 'Investasi',
-            'route' => 'investments.index',
-            'icon' => 'fas fa-chart-pie',
-        ],
-
-        [
-            'text' => 'Anggaran',
-            'route' => 'budgets.index',
-            'icon' => 'fas fa-bullseye',
-        ],
-
-        [
-            'text' => 'Tagihan Rutin',
-            'route' => 'recurring.index',
-            'icon' => 'fas fa-calendar-alt',
-        ],
-
-        [
-            'text' => 'Cicilan & Hutang',
-            'route' => 'installments.index',
-            'icon' => 'fas fa-credit-card',
-        ],
-
-        [
-            'header' => 'REPORTS',
-        ],
-
-        [
-            'text' => 'Buku Besar',
-            'route' => 'ledger.index',
-            'icon' => 'fas fa-book-open',
-        ],
-
-        [
-            'text' => 'Neraca Saldo',
-            'route' => 'reports.trial',
-            'icon' => 'fas fa-balance-scale',
-        ],
-
-        [
-            'text' => 'Laba Rugi',
-            'route' => 'reports.pl',
-            'icon' => 'fas fa-chart-line',
-        ],
-
-        [
-            'text' => 'Analisa & Proyeksi',
-            'route' => 'reports.projections',
-            'icon' => 'fas fa-magic',
-            'label' => 'NEW',
-            'label_color' => 'info',
-        ],
-
-        [
-            'header' => 'ADMINISTRATION',
+            'text' => 'Sistem & Admin',
+            'icon' => 'fas fa-cogs',
             'can' => 'super-admin-only',
-        ],
-
-        [
-            'text' => 'User Management',
-            'route' => 'admin.users.index',
-            'icon' => 'fas fa-users',
-            'can' => 'super-admin-only',
+            'submenu' => [
+                [
+                    'text' => 'User Management',
+                    'route' => 'admin.users.index',
+                    'icon' => 'fas fa-users',
+                    'can' => 'super-admin-only',
+                ],
+                [
+                    'text' => 'Workspaces',
+                    'route' => 'workspaces.index',
+                    'icon' => 'fas fa-building',
+                ],
+            ],
         ],
     ],
     /*

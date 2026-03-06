@@ -7,6 +7,7 @@ use App\Models\JournalEntry;
 use App\Models\AssetHolding;
 use App\Models\AssetPrice;
 use App\Models\Installment;
+use App\Models\InvestmentInstrument;
 use App\Models\RecurringTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,7 @@ class TransactionController extends Controller
 
         $activeInstallments = Installment::where('workspace_id', $workspaceId)->where('status', 'active')->get();
         $recurringTransactions = RecurringTransaction::where('workspace_id', $workspaceId)->where('is_active', true)->get();
+        $instruments = InvestmentInstrument::orderBy('ticker')->get();
 
         return view('transactions.create', compact(
             'assetAccounts', 
@@ -36,7 +38,8 @@ class TransactionController extends Controller
             'expenseAccounts', 
             'accounts',
             'activeInstallments',
-            'recurringTransactions'
+            'recurringTransactions',
+            'instruments'
         ));
     }
 
@@ -191,12 +194,26 @@ class TransactionController extends Controller
 
     private function handleInvestmentRecording($request, $workspaceId, $accountId)
     {
-        // Check if holding exists for this account & asset_name
-        $holding = AssetHolding::where('workspace_id', $workspaceId)
-            ->where('account_id', $accountId)
-            ->where('asset_name', $request->asset_name)
-            ->first();
+        // Link to master instrument if ticker is provided
+        $instrumentId = null;
+        if ($request->ticker) {
+            $instrument = InvestmentInstrument::where('ticker', strtoupper($request->ticker))->first();
+            if ($instrument) {
+                $instrumentId = $instrument->id;
+            }
+        }
 
+        // Check if holding exists for this account & asset_name/ticker
+        $holdingQuery = AssetHolding::where('workspace_id', $workspaceId)
+            ->where('account_id', $accountId);
+        
+        if ($instrumentId) {
+            $holdingQuery->where('instrument_id', $instrumentId);
+        } else {
+            $holdingQuery->where('asset_name', $request->asset_name);
+        }
+
+        $holding = $holdingQuery->first();
         $price = $request->amount / ($request->quantity ?: 1);
 
         if ($holding) {
@@ -206,19 +223,21 @@ class TransactionController extends Controller
             $newAvgPrice = $totalQty > 0 ? $totalCost / $totalQty : $holding->avg_buy_price;
 
             $holding->update([
+                'instrument_id' => $instrumentId,
                 'quantity' => $totalQty,
                 'avg_buy_price' => $newAvgPrice,
-                'current_price' => $price, // Assume current price is what we just paid
+                'current_price' => $price,
                 'last_updated' => Carbon::now(),
             ]);
         } else {
             // Create new holding
             AssetHolding::create([
                 'workspace_id' => $workspaceId,
+                'instrument_id' => $instrumentId,
                 'account_id' => $accountId,
                 'asset_name' => $request->asset_name,
-                'asset_type' => $request->asset_type ?? 'stock', // Dynamic from form
-                'ticker' => null, // Not heavily used yet
+                'asset_type' => $request->asset_type ?? 'stock',
+                'ticker' => strtoupper($request->ticker),
                 'quantity' => $request->quantity,
                 'avg_buy_price' => $price,
                 'current_price' => $price,
@@ -230,7 +249,7 @@ class TransactionController extends Controller
         AssetPrice::create([
             'account_id' => $accountId,
             'asset_type' => $request->asset_type ?? 'stock',
-            'ticker' => $request->asset_name,
+            'ticker' => $request->ticker ?? $request->asset_name,
             'price' => $price,
             'price_date' => $request->date,
             'source' => 'Auto From Transaction',

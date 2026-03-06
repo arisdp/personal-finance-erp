@@ -16,6 +16,7 @@ class AssetHolding extends Model
 
     protected $fillable = [
         'workspace_id',
+        'instrument_id',
         'account_id',
         'asset_type',
         'ticker',
@@ -29,10 +30,10 @@ class AssetHolding extends Model
     ];
 
     protected $casts = [
-        'quantity' => 'decimal:6',
+        'quantity'      => 'decimal:6',
         'avg_buy_price' => 'decimal:2',
         'current_price' => 'decimal:2',
-        'last_updated' => 'date',
+        'last_updated'  => 'date',
     ];
 
     public function workspace()
@@ -45,11 +46,30 @@ class AssetHolding extends Model
         return $this->belongsTo(Account::class);
     }
 
+    public function instrument()
+    {
+        return $this->belongsTo(InvestmentInstrument::class, 'instrument_id');
+    }
+
     // Computed attributes
+
+    /**
+     * Effective price: uses instrument price if linked, else stored current_price.
+     */
+    public function getEffectivePriceAttribute()
+    {
+        if ($this->instrument_id && $this->relationLoaded('instrument') && $this->instrument) {
+            return (float) $this->instrument->current_price;
+        }
+        if ($this->instrument_id && $this->instrument) {
+            return (float) $this->instrument->current_price;
+        }
+        return (float) $this->current_price;
+    }
 
     public function getMarketValueAttribute()
     {
-        return $this->quantity * $this->current_price;
+        return $this->quantity * $this->effective_price;
     }
 
     public function getCostBasisAttribute()

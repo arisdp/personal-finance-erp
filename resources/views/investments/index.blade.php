@@ -37,7 +37,8 @@
         </div>
         <div class="col-md-3 col-sm-6 col-12">
             <div class="info-box {{ $totalGainLoss >= 0 ? 'bg-success' : 'bg-danger' }}">
-                <span class="info-box-icon"><i class="fas {{ $totalGainLoss >= 0 ? 'fa-arrow-up' : 'fa-arrow-down' }}"></i></span>
+                <span class="info-box-icon"><i
+                        class="fas {{ $totalGainLoss >= 0 ? 'fa-arrow-up' : 'fa-arrow-down' }}"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">Unrealized Profit/Loss</span>
                     <span class="info-box-number">Rp {{ number_format($totalGainLoss, 0, ',', '.') }}</span>
@@ -74,39 +75,63 @@
                 </thead>
                 <tbody>
                     @forelse($holdings as $holding)
-                    <tr>
-                        <td>
-                            <span class="font-weight-bold">{{ $holding->asset_name }}</span>
-                            @if($holding->ticker) <span class="badge badge-secondary ml-1">{{ $holding->ticker }}</span> @endif
-                        </td>
-                        <td><span class="badge badge-info">{{ ucfirst($holding->asset_type) }}</span></td>
-                        <td class="text-right">{{ (float)$holding->quantity }}</td>
-                        <td class="text-right text-muted">Rp {{ number_format($holding->avg_buy_price, 0, ',', '.') }}</td>
-                        <td class="text-right font-weight-bold">Rp {{ number_format($holding->current_price, 0, ',', '.') }}</td>
-                        <td class="text-right {{ $holding->is_profit ? 'text-success' : 'text-danger' }}">
-                            {{ $holding->is_profit ? '+' : '' }}{{ number_format($holding->gain_loss_percentage, 2) }}%<br>
-                            <small>(Rp {{ number_format($holding->unrealized_gain_loss, 0, ',', '.') }})</small>
-                        </td>
-                        <td class="text-center">
-                            <form action="{{ route('investments.updatePrice', $holding) }}" method="POST" class="form-inline d-inline mr-1">
-                                @csrf @method('PATCH')
-                                <div class="input-group input-group-sm">
-                                    <input type="number" name="new_price" class="form-control" placeholder="Update Price" style="width: 100px;">
-                                    <div class="input-group-append">
-                                        <button type="submit" class="btn btn-success"><i class="fas fa-sync-alt"></i></button>
-                                    </div>
-                                </div>
-                            </form>
-                            <form action="{{ route('investments.destroy', $holding) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Hapus aset ini?')"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>
+                                <span class="font-weight-bold">{{ $holding->asset_name }}</span>
+                                @if ($holding->ticker)
+                                    <span class="badge badge-secondary ml-1">{{ $holding->ticker }}</span>
+                                @endif
+                                @if ($holding->instrument_id)
+                                    <i class="fas fa-link text-primary ml-1" title="Terhubung ke Master Instrumen"></i>
+                                @endif
+                            </td>
+                            <td><span class="badge badge-info">{{ ucfirst($holding->asset_type) }}</span></td>
+                            <td class="text-right">{{ (float) $holding->quantity }}</td>
+                            <td class="text-right text-muted">Rp {{ number_format($holding->avg_buy_price, 0, ',', '.') }}
+                            </td>
+                            <td class="text-right font-weight-bold">
+                                Rp {{ number_format($holding->effective_price, 0, ',', '.') }}
+                                @if ($holding->instrument_id)
+                                    <br><small class="text-primary font-weight-normal"><i class="fas fa-sync-alt"></i>
+                                        Menyesuaikan Master</small>
+                                @endif
+                            </td>
+                            <td class="text-right {{ $holding->is_profit ? 'text-success' : 'text-danger' }}">
+                                {{ $holding->is_profit ? '+' : '' }}{{ number_format($holding->gain_loss_percentage, 2) }}%<br>
+                                <small>(Rp {{ number_format($holding->unrealized_gain_loss, 0, ',', '.') }})</small>
+                            </td>
+                            <td class="text-center">
+                                @if (!$holding->instrument_id)
+                                    <form action="{{ route('investments.updatePrice', $holding) }}" method="POST"
+                                        class="form-inline d-inline mr-1">
+                                        @csrf @method('PATCH')
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" name="new_price" class="form-control"
+                                                placeholder="Ubah Harga" style="width: 100px;">
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-success"><i
+                                                        class="fas fa-save"></i></button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                @else
+                                    <a href="{{ route('investment_instruments.index') }}"
+                                        class="btn btn-outline-primary btn-sm mr-1" title="Update Harga di Master">
+                                        <i class="fas fa-external-link-alt"></i> Master
+                                    </a>
+                                @endif
+                                <form action="{{ route('investments.destroy', $holding) }}" method="POST"
+                                    class="d-inline">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Hapus aset ini?')"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
                     @empty
-                    <tr>
-                        <td colspan="7" class="text-center py-5">Portofolio kosong. Silakan tambahkan aset baru.</td>
-                    </tr>
+                        <tr>
+                            <td colspan="7" class="text-center py-5">Portofolio kosong. Silakan tambahkan aset baru.</td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
