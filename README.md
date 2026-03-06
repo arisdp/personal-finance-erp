@@ -3,74 +3,65 @@
 </p>
 
 ## 🚀 Tentang Proyek
-Aplikasi **Personal Finance ERP** adalah sistem manajemen keuangan keluarga kelas enterprise (menggunakan konsep Single-Ledger/Double-Entry Accounting) yang dirancang khusus untuk mempermudah pencatatan, pemantauan, dan perencanaan keuangan rumah tangga maupun invidu. 
+Aplikasi **Personal Finance ERP** adalah sistem manajemen keuangan keluarga kelas enterprise yang menggunakan konsep **Double-Entry Accounting** (Akuntansi Berpasangan). Dirancang khusus untuk mempermudah pencatatan, pemantauan, dan perencanaan keuangan rumah tangga, freelancer, maupun bisnis kecil dengan akurasi setara software akuntansi profesional namun dengan kemudahan penggunaan aplikasi personal.
 
-Berbeda dengan aplikasi pencatat pengeluaran biasa, sistem ini dibangun di atas pondasi akuntansi yang solid (Chart of Accounts, Journal Entries) namun disajikan dalam antarmuka (UI) yang sangat mudah digunakan (*user-friendly*) berkat fitur **Smart Transaction**.
-
-Sistem ini mendukung pengelolaan banyak profil keuangan melalui fitur **Multitenant Workspaces**, memungkinkan Anda memisahkan keuangan Pribadi, Keluarga, maupun Bisnis Kecil dalam satu aplikasi.
+Sistem ini mendukung pengelolaan banyak profil keuangan melalui fitur **Multi-Workspace System**, memungkinkan isolasi data yang ketat antara keuangan Pribadi, Keluarga, dan Bisnis dalam satu akun.
 
 ---
 
-## 🌟 Fitur Utama (Core Features)
+## 🌟 Fitur Unggulan (Premium Features)
 
-### 1. 📊 Smart Dashboard & Analytics
-Dashboard komprehensif yang menampilkan kondisi finansial secara *real-time*:
-- **Total Net Worth** (Kekayaan Bersih = Total Aset - Total Hutang).
-- **Cashflow Bulanan** (Pemasukan vs Pengeluaran).
-- **Status Dana Darurat** (Kalkulasi kesiapan dana darurat berdasarkan rata-rata pengeluaran vs target bulan).
-- **Monitoring Kartu Kredit & Paylater** (Pemantauan limit vs usage/penggunaan).
-- **Ringkasan Cicilan Aktif** (Total kewajiban bulanan dan sisa hutang keseluruhan).
-- **Pengingat Tagihan (Upcoming Bills)** (Peringatan tagihan yang akan jatuh tempo dalam 7 hari ke depan).
-- **Budget Monitoring** (Pemantauan realisasi anggaran bulanan dengan progress bar).
+### 1. 📊 Dashboard Finansial Eksekutif
+Dasbor interaktif yang merangkum kesehatan finansial Anda dalam sekejap:
+- **Net Worth Tracker**: Pantau kekayaan bersih (Aset - Hutang) secara real-time.
+- **Investment Portfolio Summary**: Ringkasan nilai pasar, modal, dan profit/loss investasi.
+- **Emergency Fund Ratio**: Kalkulator cerdas untuk mengukur kesiapan dana darurat.
+- **Credit Limit Monitor**: Visualisasi penggunaan limit Kartu Kredit & Paylater menggunakan progress bar.
+- **Upcoming Bills**: Pengingat otomatis untuk tagihan rutin yang akan jatuh tempo.
 
-### 2. ⚡ Smart Transaction Form
-Satu form pintar untuk semua jenis transaksi keuangan:
-- **Pengeluaran**: Mencatat biaya belanja bulanan, tagihan, dll.
-- **Pemasukan**: Mencatat gaji, bonus, dividen, dll.
-- **Transfer**: Memindahkan dana antar kas/bank.
-- **Investasi**: Membeli aset investasi (Emas, Saham, dll), otomatis mengurangi saldo bank dan menambah stok di Portofolio Investasi.
-- Seluruh input angka sudah menggunakan format ribuan otomatis (AutoNumeric) untuk mencegah salah ketik.
+### 2. ⚡ Smart Transaction (Otomasi 1-Layar)
+Antarmuka pencatatan cerdas yang menyederhanakan prinsip akuntansi Debit/Kredit:
+- **Pencatatan Cepat**: Dukungan untuk Pengeluaran, Pemasukan, Transfer, Investasi, dan Penyetoran Modal.
+- **Master Instrument Linkage**: Pilih aset investasi dari Master Harga; Nama, Tipe, dan Ticker otomatis terisi.
+- **Pemisah Ribuan Otomatis**: Integrasi AutoNumeric untuk mencegah kesalahan input nominal.
+- **Smart Debt Payment**: Mencatat pembayaran cicilan sekaligus memperbarui sisa tenor dan hutang secara otomatis.
 
-### 3. 🏦 Chart of Accounts (COA) Sistem Ganda
-Sistem menggunakan *Double-Entry Accounting* di balik layar:
-- Mendukung kategori Asset, Liability, Equity, Income, dan Expense.
-- Sub-kategori spesifik (Cash, Bank, Investment, Fixed Asset).
+### 3. 📈 Manajemen Investasi Terpusat (Master Harga)
+Sistem pengelolaan aset investasi yang canggih:
+- **Master Instrumen**: Update harga instrumen (misal: Emas, BBCA, BTC) di satu tempat; seluruh portofolio yang terkait otomatis terupdate.
+- **Unrealized Gain/Loss**: Pantau performa ROI (Return on Investment) per aset atau keseluruhan portofolio.
+- **Historical Prices**: Otomasi pencatatan riwayat harga setiap kali transaksi terjadi.
 
-### 4. 📈 Investment Portfolio Management
-- Pelacakan aset (Emas, Saham, Crypto, Reksadana, Properti).
-- Perhitungan **Unrealized Gain/Loss** (Keuntungan/Kerugian belum terealisasi).
-- Kalkulasi Modal (Cost Basis) vs Nilai Pasar (Market Value).
+### 4. � Akuntansi & Pelaporan Profesional
+Laporan keuangan standar akuntansi yang mudah dipahami:
+- **Hierarchical COA (Tree View)**: Struktur akun bertingkat dengan perhitungan saldo rekursif (Induk menjumlahkan seluruh Anak).
+- **Neraca Saldo (Trial Balance)**: Laporan posisi aset, hutang, dan modal yang terstruktur.
+- **Laba Rugi (Profit & Loss)**: Analisis pendapatan vs beban per periode.
+- **Buku Besar (General Ledger)**: Detail mutasi per akun dengan perhitungan saldo awal otomatis.
+- **Ekspor PDF**: Semua laporan dapat dicetak atau disimpan dalam format PDF secara rapi.
 
-### 5. 💳 Hutang, Cicilan & Manajemen Limit
-- Pelacakan cicilan KPR, Kendaraan, atau Gadget dengan progress pembayaran (Bulan dan Persentase).
-- Menghitung sisa tenor, bunga, dan angsuran bulanan.
-- Pelacakan batas penggunaan (Credit Limit) untuk Kartu Kredit dan layanan Paylater.
-
-### 6. 📅 Recurring Transactions (Tagihan Rutin)
-- Penjadwalan otomatis untuk tagihan berulang (Listrik, Internet, Asuransi).
-- Sinkronisasi otomatis dengan notifikasi Dashboard untuk mengingatkan jatuh tempo.
-
-### 7. 🎯 Smart Budgeting
-- Perencanaan anggaran berbasis zero-based / envelope system.
-- Peringatan dini (*early warning*) di Dashboard apabila pengeluaran mendekati atau melebihi limit.
+### 5. 📅 Perencanaan & Kontrol (Planning)
+- **Smart Budgeting**: Set batas pengeluaran per kategori akun dan terima peringatan jika melebihi anggaran.
+- **Recurring Bills**: Kelola tagihan rutin (Internet, Listrik, Asuransi) agar tidak ada yang terlewat.
+- **Installment Tracker**: Lacak sisa tenor dan total sisa hutang untuk cicilan jangka panjang (KPR/Kendaraan).
 
 ---
 
 ## 🛠️ Stack Teknologi
-- **Backend**: Laravel 11.x (PHP 8.2+)
-- **Frontend / UI**: AdminLTE 3 (Bootstrap 4)
-- **Database**: MySQL / MariaDB
-- **JavaScript Libraries**: 
-  - jQuery
-  - Select2 (untuk dropdown interaktif)
-  - AutoNumeric.js (untuk format pemisah ribuan otomatis *real-time*)
-  - SweetAlert2 / Toastr (untuk fitur notifikasi)
+- **Core Framework**: Laravel 11.x (PHP 8.2+)
+- **Frontend Template**: AdminLTE 3 (Bootstrap 4)
+- **Database**: PostgreSQL / MySQL (Universal Support)
+- **Library Pendukung**: 
+  - **AutoNumeric.js**: Validasi input mata uang real-time.
+  - **DomPDF**: Generator laporan PDF berkualitas tinggi.
+  - **Select2**: Dropdown interaktif dan pencarian akun.
+  - **Chart.js**: Visualisasi data dan proyeksi masa depan.
 
 ---
 
 ## 📥 Panduan Instalasi (Setup Guide)
 
-1. **Clone repositori ini:**
+1. **Clone repositori:**
    ```bash
    git clone <repo-url>
    cd personal-finance-erp
@@ -79,8 +70,7 @@ Sistem menggunakan *Double-Entry Accounting* di balik layar:
 2. **Install Dependencies:**
    ```bash
    composer install
-   npm install
-   npm run build
+   npm install && npm run build
    ```
 
 3. **Konfigurasi Environment:**
@@ -88,34 +78,29 @@ Sistem menggunakan *Double-Entry Accounting* di balik layar:
    cp .env.example .env
    php artisan key:generate
    ```
-   Atur koneksi database di file `.env` (DB_DATABASE, DB_USERNAME, DB_PASSWORD).
+   *Sesuaikan pengaturan DB_ di file `.env`.*
 
-4. **Jalankan Migrasi & Seeder Database:**
+4. **Persiapan Database:**
    ```bash
-   php artisan migrate:fresh
-   php artisan db:seed --class=ChartOfAccountsSeeder
-   php artisan db:seed --class=SampleDataSeeder
+   php artisan migrate --seed
    ```
-   *(Catatan: `SampleDataSeeder` akan otomatis membuat 1 user default, 1 workspace, simulasi transaksi 3 bulan terakhir, aset investasi, cicilan, dan tagihan rutin untuk keperluan demonstrasi).*
+   *(Menambahkan Chart of Accounts standar dan data sampel untuk demonstrasi).*
 
-5. **Jalankan Server Lokal:**
+5. **Jalankan Aplikasi:**
    ```bash
    php artisan serve
    ```
-   Akses aplikasi di: `http://localhost:8000`
+   Akses di: `http://localhost:8000`
 
 ---
 
-## 👨‍💻 Evaluasi Alur Kerja (Workflow Evaluation)
-Sistem ini telah melalui fase *end-to-end testing* dengan hasil:
-- **Routing & Controllers**: Semua namespace telah di-*bind* dengan benar, tidak ada error `Target class does not exist`.
-- **UI Data Binding**: Data dari *Service Layer* (`FinancialSummaryService`) ter-mapping secara akurat ke komponen Blade Dashboard.
-- **Double-Entry Validation**: Nilai Debit dan Kredit balance divalidasi dengan ketat pada form Jurnal Manual dan Smart Transaction.
-- **Blade Syntax Integrity**: Tidak ada konflik atau syntax error pada direktif `@foreach`, `@forelse`, dan `@if`.
-- **UX Form**: Masalah duplikasi input angka telah diatasi dengan inisialisasi tunggal melalui `app-custom.js`.
+## �️ Keamanan & Integritas Data
+- **Audit Trail**: Mencatat siapa yang membuat, mengubah, atau menghapus setiap entri jurnal secara otomatis.
+- **Soft Deletes**: Data yang dihapus tidak benar-benar hilang dari database, memudahkan penelusuran jika terjadi kesalahan.
+- **Data Isolation**: Multi-Workspace memastikan data antar profil keuangan tidak akan pernah bercampur.
 
 ---
 
 <p align="center">
-  Dibuat dengan ❤️ untuk mencapai Kebebasan Finansial.
+  <i>Dibuat dengan ❤️ untuk membantu Anda mencapai kebebasan finansial melalui manajemen data yang akurat.</i>
 </p>
